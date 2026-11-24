@@ -686,3 +686,92 @@ canvas#game-canvas {
 .close-btn:hover {
   color: #fff;
 }
+
+/* Bottom Arena Skill Cooldown Bar */
+.arena-skill-bar {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid var(--border-color);
+  padding: 6px 16px;
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.skill-slot {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  background: rgba(30, 41, 59, 0.75);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.skill-slot.ready {
+  border-color: var(--primary);
+  box-shadow: 0 0 12px var(--primary-glow);
+}
+
+.skill-slot.on-cooldown {
+  border-color: rgba(255, 255, 255, 0.1);
+  filter: grayscale(60%);
+}
+
+.skill-key {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 1px 4px;
+  border-radius: 3px;
+  z-index: 2;
+}
+
+.skill-icon {
+  font-size: 18px;
+  z-index: 1;
+}
+
+.skill-name {
+  font-size: 8px;
+  font-weight: 700;
+  color: #fff;
+  z-index: 1;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.skill-cd-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  background: rgba(5, 7, 15, 0.82);
+  z-index: 2;
+}
+
+.skill-cd-timer {
+  position: absolute;
+  font-size: 13px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 0 6px #000;
+  z-index: 3;
+}
+

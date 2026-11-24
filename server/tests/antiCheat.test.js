@@ -34,9 +34,11 @@ function testAntiCheat() {
   const projectiles = [];
   const events = [];
 
-  // 1-marta Skill ishlatish (Inferno Dash: 6 soniya cooldown)
+  // 1-marta Skill ishlatish (Inferno Dash)
+  const { CHARACTERS } = require('../../shared/characters');
+  const expectedCooldown = CHARACTERS.blaze_knight.attacks.skill.cooldown;
   handleCombatInput(p2, { skill: true }, projectiles, events);
-  assert.strictEqual(p2.cooldowns.skill, 6.0, 'Skill ishlatilganda cooldown 6.0 ga teng bo\'lishi kerak!');
+  assert.strictEqual(p2.cooldowns.skill, expectedCooldown, `Skill ishlatilganda cooldown ${expectedCooldown} ga teng bo'lishi kerak!`);
 
   // Darhol keyingi tickda yana Skill bosish
   const oldEventsCount = events.length;

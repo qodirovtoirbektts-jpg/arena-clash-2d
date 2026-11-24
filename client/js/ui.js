@@ -162,6 +162,44 @@ class UIManager {
     // Round Timer & Label
     document.getElementById('hud-match-timer').textContent = roundTime !== undefined ? roundTime : 60;
     document.getElementById('hud-round-label').textContent = `R${round || 1}`;
+
+    // Mahoratlar Cooldown Paneli (Skill Bar)
+    this.updateSkillCooldowns(p1);
+  }
+
+  updateSkillCooldowns(p1) {
+    if (!p1 || !p1.cooldowns) return;
+    const charDef = window.GameCharacters.CHARACTERS[p1.characterId] || window.GameCharacters.CHARACTERS.blaze_knight;
+    const attacks = charDef.attacks;
+
+    const skills = [
+      { key: 'j', cd: p1.cooldowns.light || 0, maxCd: attacks.light.cooldown, name: attacks.light.name },
+      { key: 'k', cd: p1.cooldowns.heavy || 0, maxCd: attacks.heavy.cooldown, name: attacks.heavy.name },
+      { key: 'l', cd: p1.cooldowns.skill || 0, maxCd: attacks.skill.cooldown, name: attacks.skill.name },
+      { key: 'space', cd: p1.cooldowns.dodge || 0, maxCd: attacks.dodge.cooldown, name: 'Dodge' }
+    ];
+
+    skills.forEach(s => {
+      const slot = document.getElementById(`skill-slot-${s.key}`);
+      const overlay = document.getElementById(`skill-cd-${s.key}`);
+      const timer = document.getElementById(`skill-timer-${s.key}`);
+      const nameEl = document.getElementById(`skill-name-${s.key}`);
+
+      if (nameEl && s.name) nameEl.textContent = s.name.split(' ')[0];
+
+      if (s.cd > 0.05) {
+        if (slot) slot.className = 'skill-slot on-cooldown';
+        if (overlay) {
+          const pct = Math.min(100, Math.round((s.cd / s.maxCd) * 100));
+          overlay.style.height = `${pct}%`;
+        }
+        if (timer) timer.textContent = s.cd >= 1.0 ? `${Math.ceil(s.cd)}s` : `${s.cd.toFixed(1)}s`;
+      } else {
+        if (slot) slot.className = 'skill-slot ready';
+        if (overlay) overlay.style.height = '0%';
+        if (timer) timer.textContent = '';
+      }
+    });
   }
 
   showAnnouncement(text, duration = 1500) {

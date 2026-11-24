@@ -8,6 +8,11 @@
   const { EVENT_TYPE } = 
     (typeof require !== 'undefined') ? require('./protocol') : window.GameProtocol;
 
+  // Qo'shimcha Event turlari
+  if (!EVENT_TYPE.COMBO) EVENT_TYPE.COMBO = 'combo';
+  if (!EVENT_TYPE.TELEGRAPH) EVENT_TYPE.TELEGRAPH = 'telegraph';
+  if (!EVENT_TYPE.FREEZE) EVENT_TYPE.FREEZE = 'freeze';
+
   // Yangi o'yinchi holatini yaratish
   exports.createPlayerState = function(id, username, characterId = 'blaze_knight', spawnIndex = 0) {
     const charDef = CHARACTERS[characterId] || CHARACTERS.blaze_knight;
@@ -38,6 +43,14 @@
       respawnTimer: 0,
       invulnerable: false,
 
+      // Joriy harakat holati (Action state - Nima bo'layotganini aniq ko'rsatish uchun)
+      actionState: 'IDLE', // 'IDLE' | 'WINDUP' | 'ATTACK' | 'SKILL' | 'DODGE' | 'FROZEN' | 'STUN'
+      actionBadgeText: '', // '💥 CHARGING...', '🔥 INFERNO!', '❄️ FROZEN!'
+
+      // Combo tizimi
+      comboHits: 0,
+      comboTimer: 0,
+
       // Cooldown taymerlari (soniyalarda)
       cooldowns: {
         light: 0,
@@ -47,7 +60,7 @@
       },
 
       // Joriy hujum holati
-      currentAttack: null, // { type: 'light'|'heavy'|'skill', timer: 0, windupTimer: 0, hasHit: {} }
+      currentAttack: null, // { type: 'light'|'heavy'|'skill', def, timer, windupTimer, hitTargets: {} }
       isAttacking: false,
 
       // Dodge holati
@@ -64,6 +77,7 @@
       // Status effektlari
       stunTimer: 0,
       slowTimer: 0,
+      freezeTimer: 0, // Butunlay to'xtatuvchi muzlash effekti
 
       // Statistika
       stats: {
@@ -72,7 +86,8 @@
         damageDealt: 0,
         damageTaken: 0,
         hitsLanded: 0,
-        totalAttacks: 0
+        totalAttacks: 0,
+        maxCombo: 0
       }
     };
   };
@@ -86,9 +101,43 @@
       }
     }
 
+    // Combo taymeri
+    if (player.comboTimer > 0) {
+      player.comboTimer -= dt;
+      if (player.comboTimer <= 0) {
+        player.comboHits = 0;
+      }
+    }
+
+    // Freeze taymeri
+    if (player.freezeTimer > 0) {
+      player.freezeTimer -= dt;
+      player.actionState = 'FROZEN';
+      player.actionBadgeText = '❄️ MUZLAGAN!';
+      if (player.freezeTimer <= 0) {
+        player.actionState = 'IDLE';
+        player.actionBadgeText = '';
+      }
+    }
+
+    // Stun taymeri
+    if (player.stunTimer > 0) {
+      player.stunTimer -= dt;
+      if (player.freezeTimer <= 0) {
+        player.actionState = 'STUN';
+        player.actionBadgeText = '💫 GANDIRASLASH!';
+      }
+      if (player.stunTimer <= 0 && player.freezeTimer <= 0) {
+        player.actionState = 'IDLE';
+        player.actionBadgeText = '';
+      }
+    }
+
     // Respawn taymeri
     if (player.isDead) {
       player.respawnTimer -= dt;
+      player.actionState = 'DEAD';
+      player.actionBadgeText = '☠️ MAG\'LUB';
       if (player.respawnTimer <= 0) {
         exports.respawnPlayer(player);
       }
@@ -114,16 +163,21 @@
     player.isDashing = false;
     player.stunTimer = 0;
     player.slowTimer = 0;
-    // 1.5 soniya vaqtinchalik himoya (Spawn protection)
+    player.freezeTimer = 0;
+    player.actionState = 'IDLE';
+    player.actionBadgeText = '✨ TIKLANISH!';
     player.invulnerable = true;
     setTimeout(() => {
-      if (player) player.invulnerable = false;
+      if (player) {
+        player.invulnerable = false;
+        if (player.actionState === 'IDLE') player.actionBadgeText = '';
+      }
     }, 1500);
   };
 
   // Hujum yoki Dodge buyrug'ini qabul qilish
   exports.handleCombatInput = function(player, input, projectiles, events) {
-    if (player.isDead || player.stunTimer > 0) return;
+    if (player.isDead || player.stunTimer > 0 || player.freezeTimer > 0) return;
     const charDef = CHARACTERS[player.characterId];
     if (!charDef) return;
 
@@ -136,8 +190,9 @@
       player.invulnerable = true;
       player.currentAttack = null;
       player.isAttacking = false;
+      player.actionState = 'DODGE';
+      player.actionBadgeText = dodgeDef.telegraphText || '💨 DODGE!';
 
-      // Yo'nalish
       let dirX = input.moveX || player.facing;
       if (dirX === 0) dirX = player.facing;
       player.dodgeVx = dirX * dodgeDef.speed;
@@ -159,9 +214,10 @@
       const skillDef = charDef.attacks.skill;
       player.cooldowns.skill = skillDef.cooldown;
       player.stats.totalAttacks++;
+      player.actionState = 'SKILL';
+      player.actionBadgeText = skillDef.telegraphText || '⚡ SKILL!';
 
       if (skillDef.type === 'dash_attack') {
-        // Blaze Knight: Inferno Dash
         player.isDashing = true;
         player.dashTimer = skillDef.duration;
         player.dashVx = player.facing * skillDef.dashSpeed;
@@ -185,7 +241,6 @@
           y: player.y
         });
       } else if (skillDef.type === 'teleport_attack') {
-        // Shadow Ninja: Shadow Strike
         const targetX = player.x + player.facing * skillDef.teleportDist;
         player.x = Math.max(80, Math.min(targetX, ARENA_WIDTH - 80));
 
@@ -207,7 +262,6 @@
           y: player.y
         });
       } else if (skillDef.type === 'aoe_blast') {
-        // Frost Mage: Blizzard Nova
         player.currentAttack = {
           type: 'skill',
           def: skillDef,
@@ -234,9 +288,10 @@
       const heavyDef = charDef.attacks.heavy;
       player.cooldowns.heavy = heavyDef.cooldown;
       player.stats.totalAttacks++;
+      player.actionState = 'WINDUP';
+      player.actionBadgeText = heavyDef.telegraphText || '💥 KUCHLI ZARBA!';
 
       if (heavyDef.type === 'projectile') {
-        // Ninja Kunai
         projectiles.push({
           id: 'proj_' + Math.random().toString(36).substring(2, 9),
           ownerId: player.id,
@@ -253,8 +308,8 @@
           color: '#00d2d3',
           type: 'kunai'
         });
+        setTimeout(() => { if (player.actionState === 'WINDUP') player.actionState = 'IDLE'; }, 180);
       } else if (heavyDef.type === 'multi_projectile') {
-        // Frost Mage Shard Wave
         heavyDef.spreadAngles.forEach(angle => {
           const speed = heavyDef.projSpeed;
           const vx = Math.cos(angle) * speed * player.facing;
@@ -276,8 +331,9 @@
             type: 'ice_shard'
           });
         });
+        setTimeout(() => { if (player.actionState === 'WINDUP') player.actionState = 'IDLE'; }, 180);
       } else {
-        // Blaze Knight Flame Cleave (Melee)
+        // Melee (Blaze Knight Flame Cleave)
         player.currentAttack = {
           type: 'heavy',
           def: heavyDef,
@@ -295,9 +351,10 @@
       const lightDef = charDef.attacks.light;
       player.cooldowns.light = lightDef.cooldown;
       player.stats.totalAttacks++;
+      player.actionState = 'ATTACK';
+      player.actionBadgeText = lightDef.telegraphText || '⚔️ ZARBA!';
 
       if (lightDef.type === 'projectile') {
-        // Frost Bolt
         projectiles.push({
           id: 'proj_' + Math.random().toString(36).substring(2, 9),
           ownerId: player.id,
@@ -308,14 +365,16 @@
           vy: 0,
           radius: lightDef.projRadius,
           damage: lightDef.damage,
+          slowDuration: lightDef.slowDuration,
+          slowFactor: lightDef.slowFactor,
           knockbackX: lightDef.knockbackX,
           knockbackY: lightDef.knockbackY,
           lifespan: lightDef.projLifespan,
           color: '#0984e3',
           type: 'frost_bolt'
         });
+        setTimeout(() => { if (player.actionState === 'ATTACK') player.actionState = 'IDLE'; }, 150);
       } else {
-        // Melee (Blaze Knight Slash / Ninja Daggers)
         player.currentAttack = {
           type: 'light',
           def: lightDef,
@@ -350,13 +409,12 @@
       for (let j = 0; j < playerList.length; j++) {
         const target = playerList[j];
         if (target.id === attacker.id || target.isDead || target.invulnerable) continue;
-        if (attack.hitTargets[target.id]) continue; // Bir hujum bitta targetga faqat 1 marta tekkiziladi
+        if (attack.hitTargets[target.id]) continue;
 
         let hit = false;
         const targetBounds = getPlayerBounds(target);
 
         if (def.type === 'melee' || def.type === 'dash_attack') {
-          // Attacker oldidagi to'rtburchak hitbox
           const attackBox = {
             x: attacker.facing > 0 ? attacker.x : attacker.x - def.hitboxW,
             y: attacker.y - attacker.height * 0.85,
@@ -365,7 +423,6 @@
           };
           hit = checkAABB(attackBox, targetBounds);
         } else if (def.type === 'aoe_blast' || def.type === 'teleport_attack') {
-          // Doira shaklidagi AoE
           hit = circleAABB(attacker.x, attacker.y - attacker.height / 2, def.hitboxRadius, targetBounds);
         }
 
@@ -379,6 +436,10 @@
       if (attack.timer <= 0) {
         attacker.isAttacking = false;
         attacker.currentAttack = null;
+        if (attacker.actionState !== 'FROZEN' && attacker.actionState !== 'STUN') {
+          attacker.actionState = 'IDLE';
+          attacker.actionBadgeText = '';
+        }
       }
     }
   };
@@ -393,7 +454,6 @@
       proj.x += proj.vx * dt;
       proj.y += proj.vy * dt;
 
-      // Platforma yoki devorga urilish
       let collidedWithObstacle = false;
       for (let p = 0; p < PLATFORMS.length; p++) {
         const plat = PLATFORMS[p];
@@ -403,13 +463,11 @@
         }
       }
 
-      // Xaritadan chiqish yoki to'siqqa urilish
       if (collidedWithObstacle || proj.lifespan <= 0 || proj.x < 50 || proj.x > ARENA_WIDTH - 50) {
         projectiles.splice(i, 1);
         continue;
       }
 
-      // O'yinchilarga urilish
       let hitTarget = false;
       for (let j = 0; j < playerList.length; j++) {
         const target = playerList[j];
@@ -439,19 +497,56 @@
     }
   };
 
-  // Shikastlanish (Damage) va knockback qo'llash
+  // Shikastlanish (Damage), Knockback va Combo qo'llash
   exports.applyDamage = function(attacker, target, damage, kbX, kbY, attackDef, events) {
     target.hp = Math.max(0, target.hp - damage);
 
-    // Knockback
-    const dir = (attacker.x < target.x) ? 1 : -1;
-    target.vx = (kbX || 250) * dir;
-    target.vy = kbY || -150;
-    target.onGround = false;
+    // Super-Armor tekshiruvi: Agar nishon Super-Armorli hujum windupida bo'lsa, uni to'xtatmaymiz
+    const hasSuperArmor = target.isAttacking && target.currentAttack && target.currentAttack.def && target.currentAttack.def.superArmor;
 
-    // Status effektlari (Slow, Stun)
+    if (!hasSuperArmor) {
+      const dir = (attacker.x < target.x) ? 1 : -1;
+      target.vx = (kbX || 250) * dir;
+      target.vy = kbY || -150;
+      target.onGround = false;
+    }
+
+    // Freeze (Muzlatish)
+    if (attackDef && attackDef.freezeDuration) {
+      target.freezeTimer = attackDef.freezeDuration;
+      target.actionState = 'FROZEN';
+      target.actionBadgeText = '❄️ MUZLAGAN!';
+      events.push({
+        type: EVENT_TYPE.FREEZE,
+        targetId: target.id,
+        duration: attackDef.freezeDuration,
+        x: target.x,
+        y: target.y
+      });
+    }
+
+    // Status effektlari (Slow)
     if (attackDef && attackDef.slowDuration) {
       target.slowTimer = attackDef.slowDuration;
+    }
+
+    // Combo hisoblash
+    if (attacker.comboTimer !== undefined) {
+      attacker.comboHits = (attacker.comboHits || 0) + 1;
+      attacker.comboTimer = 1.6; // 1.6 soniya ichida keyingi zarba
+      if (attacker.stats) {
+        attacker.stats.maxCombo = Math.max(attacker.stats.maxCombo || 0, attacker.comboHits);
+      }
+
+      if (attacker.comboHits >= 2) {
+        events.push({
+          type: EVENT_TYPE.COMBO,
+          attackerId: attacker.id,
+          comboCount: attacker.comboHits,
+          x: target.x,
+          y: target.y - target.height
+        });
+      }
     }
 
     // Statistika
@@ -470,13 +565,16 @@
       damage,
       x: target.x,
       y: target.y - target.height / 2,
-      targetHp: target.hp
+      targetHp: target.hp,
+      attackType: attackDef ? (attackDef.type || attackDef.id) : 'hit'
     });
 
     // O'lim holati
     if (target.hp <= 0 && !target.isDead) {
       target.isDead = true;
-      target.respawnTimer = 2.0; // 2 soniyadan keyin respawn
+      target.respawnTimer = 2.0;
+      target.actionState = 'DEAD';
+      target.actionBadgeText = '☠️ MAG\'LUB';
       if (attacker.stats) attacker.stats.kills++;
       if (target.stats) target.stats.deaths++;
       if (attacker.score !== undefined) attacker.score++;

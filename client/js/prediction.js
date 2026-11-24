@@ -104,6 +104,12 @@ class ClientPrediction {
     this.predictedState.score = serverPlayer.score;
     this.predictedState.roundsWon = serverPlayer.roundsWon;
     this.predictedState.facing = serverPlayer.facing;
+    this.predictedState.actionState = serverPlayer.actionState || 'IDLE';
+    this.predictedState.actionBadgeText = serverPlayer.actionBadgeText || '';
+    this.predictedState.comboHits = serverPlayer.comboHits || 0;
+    this.predictedState.freezeTimer = serverPlayer.freezeTimer || 0;
+    this.predictedState.slowTimer = serverPlayer.slowTimer || 0;
+    this.predictedState.stunTimer = serverPlayer.stunTimer || 0;
   }
 
   // Har bir frame renderida vizual offsetni 0 ga intiltirish

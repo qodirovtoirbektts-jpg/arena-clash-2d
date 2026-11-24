@@ -368,6 +368,10 @@ class GameEngine {
         isDashing: p.isDashing,
         stunTimer: Math.round(p.stunTimer * 10) / 10,
         slowTimer: Math.round(p.slowTimer * 10) / 10,
+        freezeTimer: Math.round((p.freezeTimer || 0) * 10) / 10,
+        actionState: p.actionState || 'IDLE',
+        actionBadgeText: p.actionBadgeText || '',
+        comboHits: p.comboHits || 0,
         cooldowns: {
           light: Math.round(p.cooldowns.light * 10) / 10,
           heavy: Math.round(p.cooldowns.heavy * 10) / 10,

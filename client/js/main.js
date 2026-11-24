@@ -116,26 +116,38 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function handleServerEvent(ev, selfId) {
     if (ev.type === EVENT_TYPE.HIT) {
-      window.renderer.triggerScreenShake(ev.damage > 20 ? 8 : 4);
+      const isHeavy = ev.damage > 20;
+      window.renderer.triggerScreenShake(isHeavy ? 10 : 4);
+      if (isHeavy) window.renderer.triggerHitStop(0.045);
       window.renderer.addHitFlash(ev.targetId);
-      window.renderer.addDamageText(ev.x, ev.y, `-${ev.damage}`, '#ff4757', ev.damage > 20);
-      window.renderer.spawnParticles(ev.x, ev.y, 8, '#ff4757', 160);
-      window.audioManager.playHit(ev.damage > 20);
+      window.renderer.addDamageText(ev.x, ev.y, `-${ev.damage}`, isHeavy ? '#ffa502' : '#ff4757', isHeavy);
+      window.renderer.spawnParticles(ev.x, ev.y, isHeavy ? 16 : 8, isHeavy ? '#ffa502' : '#ff4757', isHeavy ? 240 : 160);
+      window.audioManager.playHit(isHeavy);
+    } else if (ev.type === EVENT_TYPE.COMBO) {
+      window.renderer.addComboNotification(ev.x, ev.y, ev.comboCount);
+      window.audioManager.playCombo(ev.comboCount);
+    } else if (ev.type === EVENT_TYPE.FREEZE) {
+      window.audioManager.playFreeze();
+      window.renderer.spawnParticles(ev.x, ev.y, 25, '#74b9ff', 200);
+      window.renderer.addGroundDecal(ev.x, ev.y, 'frost');
     } else if (ev.type === EVENT_TYPE.DODGE) {
       window.audioManager.playDodge();
       window.renderer.spawnParticles(ev.x, ev.y, 6, '#38bdf8', 120);
     } else if (ev.type === EVENT_TYPE.SKILL_CAST) {
       window.audioManager.playSkill(ev.characterId);
       if (ev.characterId === 'frost_mage') {
+        window.renderer.addGroundDecal(ev.x, ev.y, 'frost');
         window.renderer.spawnParticles(ev.x, ev.y, 30, '#00d2d3', 220);
       } else if (ev.characterId === 'blaze_knight') {
+        window.renderer.addGroundDecal(ev.x, ev.y, 'fire');
         window.renderer.spawnParticles(ev.x, ev.y, 30, '#ff4757', 260);
       }
     } else if (ev.type === EVENT_TYPE.KILL) {
       window.audioManager.playDeath();
-      window.renderer.triggerScreenShake(14);
-      window.renderer.spawnParticles(ev.x, ev.y, 30, '#ff4757', 260);
-      window.renderer.addDamageText(ev.x, ev.y - 30, 'KNOCKOUT!', '#e74c3c', true);
+      window.renderer.triggerScreenShake(16);
+      window.renderer.triggerHitStop(0.08);
+      window.renderer.spawnParticles(ev.x, ev.y, 35, '#ff4757', 280);
+      window.renderer.addDamageText(ev.x, ev.y - 30, 'KNOCKOUT! 💥', '#e74c3c', true);
     } else if (ev.type === EVENT_TYPE.ROUND_START) {
       window.uiManager.showAnnouncement(`ROUND ${ev.round} — JANG!`);
       window.audioManager.playCountdown(true);
