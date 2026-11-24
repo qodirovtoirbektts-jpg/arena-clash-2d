@@ -23,6 +23,7 @@ class Renderer {
 
     // Animatsiya vaqti
     this.animTime = 0;
+    this.isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
   }
 
   triggerScreenShake(intensity = 8) {
@@ -78,7 +79,12 @@ class Renderer {
   }
 
   spawnParticles(x, y, count = 10, color = '#ff4757', speed = 150) {
-    for (let i = 0; i < count; i++) {
+    const actualCount = this.isMobile ? Math.ceil(count * 0.6) : count;
+    const maxAllowed = this.isMobile ? 45 : 120;
+    if (this.particles.length > maxAllowed) {
+      this.particles.splice(0, this.particles.length - maxAllowed);
+    }
+    for (let i = 0; i < actualCount; i++) {
       const angle = Math.random() * Math.PI * 2;
       const spd = Math.random() * speed + 30;
       this.particles.push({

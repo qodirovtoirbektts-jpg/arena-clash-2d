@@ -29,25 +29,29 @@ class InputManager {
   getPlayer1Input(clientTick = 0) {
     this.seq++;
 
+    const touch = window.touchControls ? window.touchControls.getTouchState() : {};
+
     let moveX = 0;
     if (this.keys['KeyA']) moveX -= 1;
     if (this.keys['KeyD']) moveX += 1;
+    if (touch.moveX) moveX = touch.moveX;
 
     let moveY = 0;
     if (this.keys['KeyW']) moveY -= 1;
     if (this.keys['KeyS']) moveY += 1;
+    if (touch.moveY) moveY = touch.moveY;
 
     const inputData = {
       seq: this.seq,
       tick: clientTick,
       moveX,
       moveY,
-      jump: !!this.keys['KeyW'],
-      drop: !!this.keys['KeyS'],
-      attackLight: !!this.keys['KeyJ'],
-      attackHeavy: !!this.keys['KeyK'],
-      skill: !!this.keys['KeyL'],
-      dodge: !!this.keys['Space']
+      jump: !!this.keys['KeyW'] || !!touch.jump,
+      drop: !!this.keys['KeyS'] || !!touch.drop,
+      attackLight: !!this.keys['KeyJ'] || !!touch.attackLight,
+      attackHeavy: !!this.keys['KeyK'] || !!touch.attackHeavy,
+      skill: !!this.keys['KeyL'] || !!touch.skill,
+      dodge: !!this.keys['Space'] || !!touch.dodge
     };
 
     this.unacknowledgedInputs.push(inputData);

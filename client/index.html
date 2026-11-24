@@ -2,7 +2,11 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0e17">
   <title>Arena Clash 2D — Onlayn Multiplayer Jang Arenasi</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -18,7 +22,9 @@
         <span id="user-display-name" style="font-weight: 600; color: #fff;">O'yinchi</span>
         <span class="mmr-badge" id="user-mmr-badge">🏆 1200 MMR</span>
         <span class="ping-pill" id="ping-display">📶 0 ms</span>
-        <button id="btn-toggle-sound" class="btn btn-secondary" style="width: auto; padding: 6px 12px; margin-bottom: 0;">🔊 Ovoz</button>
+        <button id="btn-toggle-sound" class="btn btn-secondary header-btn">🔊 Ovoz</button>
+        <button id="btn-toggle-touch" class="btn btn-secondary header-btn" title="Sensorli boshqaruv">📱 Sensor</button>
+        <button id="btn-toggle-fullscreen" class="btn btn-secondary header-btn" title="To'liq ekran">⛶ Ekran</button>
       </div>
     </header>
 
@@ -248,6 +254,44 @@
             <span class="skill-cd-timer" id="skill-timer-space"></span>
           </div>
         </div>
+
+        <!-- Mobil Sensorli Boshqaruv (Virtual Touch Controls) -->
+        <div id="virtual-touch-controls" class="virtual-touch-overlay" style="display: none;">
+          <!-- Chap tomon: D-Pad / Yo'nalishlar -->
+          <div class="touch-dpad-container">
+            <button class="touch-btn touch-btn-dir touch-btn-up" data-dir="up" id="btn-touch-up">▲</button>
+            <div class="touch-dpad-middle">
+              <button class="touch-btn touch-btn-dir touch-btn-left" data-dir="left" id="btn-touch-left">◀</button>
+              <div class="touch-dpad-center">🕹️</div>
+              <button class="touch-btn touch-btn-dir touch-btn-right" data-dir="right" id="btn-touch-right">▶</button>
+            </div>
+            <button class="touch-btn touch-btn-dir touch-btn-down" data-dir="down" id="btn-touch-down">▼</button>
+          </div>
+
+          <!-- O'ng tomon: Jang Tugmalari (Actions) -->
+          <div class="touch-actions-container">
+            <div class="touch-actions-row">
+              <button class="touch-btn touch-btn-action touch-btn-skill" data-action="skill" id="btn-touch-skill">
+                <span class="touch-btn-icon">⚡</span>
+                <span class="touch-btn-label">SKILL</span>
+              </button>
+              <button class="touch-btn touch-btn-action touch-btn-heavy" data-action="heavy" id="btn-touch-heavy">
+                <span class="touch-btn-icon">💥</span>
+                <span class="touch-btn-label">OG'IR</span>
+              </button>
+            </div>
+            <div class="touch-actions-row">
+              <button class="touch-btn touch-btn-action touch-btn-dodge" data-action="dodge" id="btn-touch-dodge">
+                <span class="touch-btn-icon">💨</span>
+                <span class="touch-btn-label">DODGE</span>
+              </button>
+              <button class="touch-btn touch-btn-action touch-btn-light" data-action="light" id="btn-touch-light">
+                <span class="touch-btn-icon">⚔️</span>
+                <span class="touch-btn-label">ZARBA</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Boshqaruv tugmalari eslatmasi -->
@@ -332,6 +376,7 @@
 
   <script src="js/audio.js"></script>
   <script src="js/renderer.js"></script>
+  <script src="js/touchControls.js"></script>
   <script src="js/input.js"></script>
   <script src="js/prediction.js"></script>
   <script src="js/interpolation.js"></script>

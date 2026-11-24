@@ -3,6 +3,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('game-canvas');
   window.renderer = new Renderer(canvas);
   window.uiManager.init();
+  window.touchControls.init();
 
   let lastTime = performance.now();
   let fpsCounter = 0;

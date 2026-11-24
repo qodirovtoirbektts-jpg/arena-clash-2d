@@ -18,6 +18,9 @@ class AudioManager {
   }
 
   resume() {
+    if (!this.ctx) {
+      this.initContext();
+    }
     if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
