@@ -1,0 +1,226 @@
+{
+  "users": {
+    "usr_ef4b6ee5": {
+      "id": "usr_ef4b6ee5",
+      "username": "Bot_Blaze",
+      "token": "e73935d3-dca8-431a-baa7-ef8cd79874d4",
+      "mmr": 1250,
+      "favoriteCharacter": "blaze_knight",
+      "stats": {
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "kills": 0,
+        "deaths": 0,
+        "totalDamage": 0
+      },
+      "matchHistory": [],
+      "createdAt": 1795522198146
+    },
+    "usr_83ef6727": {
+      "id": "usr_83ef6727",
+      "username": "ShadowMaster",
+      "token": "1dd55a92-0159-4c61-90fc-e2df80647b9a",
+      "mmr": 1380,
+      "favoriteCharacter": "shadow_ninja",
+      "stats": {
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "kills": 0,
+        "deaths": 0,
+        "totalDamage": 0
+      },
+      "matchHistory": [],
+      "createdAt": 1795522198147
+    },
+    "usr_d3e77dd1": {
+      "id": "usr_d3e77dd1",
+      "username": "FrostQueen",
+      "token": "bd1039e0-2a89-4b20-8b20-789829c07228",
+      "mmr": 1310,
+      "favoriteCharacter": "frost_mage",
+      "stats": {
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "kills": 0,
+        "deaths": 0,
+        "totalDamage": 0
+      },
+      "matchHistory": [],
+      "createdAt": 1795522198148
+    },
+    "usr_eeed47a8": {
+      "id": "usr_eeed47a8",
+      "username": "LoadBot_0",
+      "token": "e4165d56-a9bb-4bda-a9f8-664b4c624d7a",
+      "mmr": 1200,
+      "favoriteCharacter": "blaze_knight",
+      "stats": {
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "kills": 0,
+        "deaths": 0,
+        "totalDamage": 0
+      },
+      "matchHistory": [],
+      "createdAt": 1795522539072
+    },
+    "usr_e62aa07c": {
+      "id": "usr_e62aa07c",
+      "username": "LoadBot_1",
+      "token": "93baea32-8e67-4f3f-afc4-f38acd36d6b5",
+      "mmr": 1200,
+      "favoriteCharacter": "shadow_ninja",
+      "stats": {
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "kills": 0,
+        "deaths": 0,
+        "totalDamage": 0
+      },
+      "matchHistory": [],
+      "createdAt": 1795522539186
+    },
+    "usr_3d2a0b6a": {
+      "id": "usr_3d2a0b6a",
+      "username": "LoadBot_2",
+      "token": "55648b5e-2fb6-4619-9ca2-9503910c7eb7",
+      "mmr": 1200,
+      "favoriteCharacter": "frost_mage",
+      "stats": {
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "kills": 0,
+        "deaths": 0,
+        "totalDamage": 0
+      },
+      "matchHistory": [],
+      "createdAt": 1795522539302
+    },
+    "usr_1d50a3d5": {
+      "id": "usr_1d50a3d5",
+      "username": "LoadBot_3",
+      "token": "339a9083-bd55-4ead-832b-67fb57f7a586",
+      "mmr": 1200,
+      "favoriteCharacter": "blaze_knight",
+      "stats": {
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "kills": 0,
+        "deaths": 0,
+        "totalDamage": 0
+      },
+      "matchHistory": [],
+      "createdAt": 1795522539412
+    },
+    "usr_3e44dd98": {
+      "id": "usr_3e44dd98",
+      "username": "LoadBot_4",
+      "token": "4343d1a3-64ea-4ac2-a945-7c8f4d8c8fe9",
+      "mmr": 1200,
+      "favoriteCharacter": "shadow_ninja",
+      "stats": {
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "kills": 0,
+        "deaths": 0,
+        "totalDamage": 0
+      },
+      "matchHistory": [],
+      "createdAt": 1795522539517
+    },
+    "usr_bf00c2c9": {
+      "id": "usr_bf00c2c9",
+      "username": "LoadBot_5",
+      "token": "7f0734c2-ea77-4ede-88db-481ac27b0041",
+      "mmr": 1200,
+      "favoriteCharacter": "frost_mage",
+      "stats": {
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "kills": 0,
+        "deaths": 0,
+        "totalDamage": 0
+      },
+      "matchHistory": [],
+      "createdAt": 1795522539630
+    },
+    "usr_aad2a5ff": {
+      "id": "usr_aad2a5ff",
+      "username": "LoadBot_6",
+      "token": "f7384fff-7b6d-43ac-bbc5-cd85e65d66a9",
+      "mmr": 1200,
+      "favoriteCharacter": "blaze_knight",
+      "stats": {
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "kills": 0,
+        "deaths": 0,
+        "totalDamage": 0
+      },
+      "matchHistory": [],
+      "createdAt": 1795522539737
+    },
+    "usr_0e568640": {
+      "id": "usr_0e568640",
+      "username": "LoadBot_7",
+      "token": "c06d9ec9-2536-4daf-b2a3-f5ce530bdab9",
+      "mmr": 1200,
+      "favoriteCharacter": "shadow_ninja",
+      "stats": {
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "kills": 0,
+        "deaths": 0,
+        "totalDamage": 0
+      },
+      "matchHistory": [],
+      "createdAt": 1795522539850
+    },
+    "usr_789317b5": {
+      "id": "usr_789317b5",
+      "username": "LoadBot_8",
+      "token": "4f8ac4bf-d989-48f1-845b-49b9b4ffe998",
+      "mmr": 1200,
+      "favoriteCharacter": "frost_mage",
+      "stats": {
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "kills": 0,
+        "deaths": 0,
+        "totalDamage": 0
+      },
+      "matchHistory": [],
+      "createdAt": 1795522539961
+    },
+    "usr_fb32d23b": {
+      "id": "usr_fb32d23b",
+      "username": "LoadBot_9",
+      "token": "5118d5f3-c272-4d61-86b8-b3bfb2b160c3",
+      "mmr": 1200,
+      "favoriteCharacter": "blaze_knight",
+      "stats": {
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "kills": 0,
+        "deaths": 0,
+        "totalDamage": 0
+      },
+      "matchHistory": [],
+      "createdAt": 1795522540070
+    }
+  },
+  "replays": []
+}

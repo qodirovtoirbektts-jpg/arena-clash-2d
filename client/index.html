@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arena Clash 2D — Onlayn Multiplayer Jang Arenasi</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app-container">
+    <!-- Yuqori Boshqaruv Paneli (Header) -->
+    <header>
+      <div class="logo-area">
+        <span class="logo-icon">⚔️</span>
+        <h1 class="game-title">Arena Clash 2D</h1>
+      </div>
+      <div class="header-user-info">
+        <span id="user-display-name" style="font-weight: 600; color: #fff;">O'yinchi</span>
+        <span class="mmr-badge" id="user-mmr-badge">🏆 1200 MMR</span>
+        <span class="ping-pill" id="ping-display">📶 0 ms</span>
+        <button id="btn-toggle-sound" class="btn btn-secondary" style="width: auto; padding: 6px 12px; margin-bottom: 0;">🔊 Ovoz</button>
+      </div>
+    </header>
+
+    <!-- 1. BOSH MENYU / PROFIL EKRANI -->
+    <div id="screen-main-menu" class="screen active">
+      <div class="menu-grid">
+        <!-- Chap: Foydalanuvchi Profili va Belgilar -->
+        <div class="card">
+          <div class="card-title">👤 Jangchi Profili</div>
+          <div class="input-group">
+            <input type="text" id="username-input" class="input-field" placeholder="Ismingizni kiriting..." maxlength="16">
+            <button id="btn-save-username" class="btn btn-primary" style="width: auto; margin-bottom: 0;">Saqlash</button>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: var(--text-muted);">
+            <span>G'alabalar / Mag'lubiyatlar:</span>
+            <strong id="profile-wl" style="color: #fff;">0 / 0</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 14px; color: var(--text-muted);">
+            <span>G'alaba ko'rsatkichi (Winrate):</span>
+            <strong id="profile-winrate" style="color: var(--accent-green);">0%</strong>
+          </div>
+          <button id="btn-open-char-select" class="btn btn-secondary">🎭 Qahramonni Tanlash (<span id="selected-char-name">Blaze Knight</span>)</button>
+          <button id="btn-view-leaderboard" class="btn btn-secondary">🏆 Reyting Jadvali (Leaderboard)</button>
+          <button id="btn-view-replays" class="btn btn-secondary">📹 Janglar Replaylari</button>
+        </div>
+
+        <!-- O'ng: O'yin Rejimlari -->
+        <div class="card">
+          <div class="card-title">⚔️ Jang Rejimlari</div>
+          <button id="btn-join-matchmaking" class="btn btn-primary" style="font-size: 16px; padding: 14px;">
+            ⚡ Onlayn Matchmaking (MMR Duel)
+          </button>
+          <div id="queue-status-box" style="display: none; background: rgba(56, 189, 248, 0.1); border: 1px solid var(--primary); padding: 12px; border-radius: 10px; margin-bottom: 12px; text-align: center;">
+            <div style="color: var(--primary); font-weight: 700; margin-bottom: 4px;">🔍 Raqib qidirilmoqda...</div>
+            <div style="font-size: 13px; color: var(--text-muted);">Vaqt: <span id="queue-timer">0</span>s | Navbatda: <span id="queue-count">1</span> o'yinchi</div>
+            <button id="btn-cancel-queue" class="btn btn-danger" style="margin-top: 8px; padding: 6px 12px; width: auto; font-size: 13px;">Bekor qilish</button>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <button id="btn-create-room" class="btn btn-secondary" style="flex: 1;">🏠 Xona Yaratish</button>
+            <input type="text" id="join-room-code-input" class="input-field" placeholder="KOD..." maxlength="6" style="width: 100px; text-transform: uppercase;">
+            <button id="btn-join-room" class="btn btn-secondary" style="width: auto;">Kirish</button>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;">
+
+          <!-- Lokal Rejimlar (Offline) -->
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: 700;">Offline / Prototip Rejimlari:</div>
+          <button id="btn-local-pvp" class="btn btn-gold">
+            👥 Lokal 2-O'yinchi (1 ta klaviaturada)
+          </button>
+          <button id="btn-vs-bot" class="btn btn-secondary">
+            🤖 AI Botga qarshi mashg'ulot
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. QAHRAMON TANLASH EKRANI -->
+    <div id="screen-character-select" class="screen">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h2 style="font-size: 28px; font-weight: 800; color: #fff;">Qahramoningizni Tanlang</h2>
+        <p style="color: var(--text-muted); font-size: 14px;">Har bir jangchi o'ziga xos mahorat, tezlik va jang uslubiga ega</p>
+      </div>
+
+      <div class="character-roster">
+        <!-- 1. Blaze Knight -->
+        <div class="char-card selected" data-char="blaze_knight">
+          <div class="char-avatar-box" style="background: linear-gradient(135deg, rgba(255, 71, 87, 0.2), rgba(255, 165, 2, 0.2)); border: 1px solid #ff4757;">
+            <span style="font-size: 58px;">🗡️</span>
+          </div>
+          <span class="char-badge" style="background: rgba(255, 71, 87, 0.2); color: #ff4757;">Bruiser / Tank</span>
+          <div class="char-name" style="color: #ff4757;">Blaze Knight</div>
+          <div class="char-desc">Kuchli qilich zarbalari, olovli dash va yuqori chidamlilikka ega olovli jangchi.</div>
+          <div class="stat-row"><span>Jon (HP):</span><strong>120</strong></div>
+          <div class="stat-row"><span>Hujum kuchi:</span><strong>Yuqori</strong></div>
+          <div class="stat-row"><span>Harakat tezligi:</span><strong>O'rta</strong></div>
+          <div class="char-skills">
+            <div class="skill-item"><span class="key-badge">J</span> Fire Slash (12 dmg)</div>
+            <div class="skill-item"><span class="key-badge">K</span> Flame Cleave (26 dmg)</div>
+            <div class="skill-item"><span class="key-badge">L</span> Inferno Dash (35 dmg + i-frame)</div>
+            <div class="skill-item"><span class="key-badge">Space</span> Flame Roll (Dodge)</div>
+          </div>
+        </div>
+
+        <!-- 2. Shadow Ninja -->
+        <div class="char-card" data-char="shadow_ninja">
+          <div class="char-avatar-box" style="background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(0, 210, 211, 0.2)); border: 1px solid #9b59b6;">
+            <span style="font-size: 58px;">🥷</span>
+          </div>
+          <span class="char-badge" style="background: rgba(155, 89, 182, 0.2); color: #9b59b6;">Assassin / Mobility</span>
+          <div class="char-name" style="color: #9b59b6;">Shadow Ninja</div>
+          <div class="char-desc">Eng yuqori tezlik, ikki marta sakrash va masofaviy kunai uloqtiruvchi chaqqon qotil.</div>
+          <div class="stat-row"><span>Jon (HP):</span><strong>95</strong></div>
+          <div class="stat-row"><span>Hujum kuchi:</span><strong>Portlovchi</strong></div>
+          <div class="stat-row"><span>Harakat tezligi:</span><strong>Juda Yuqori</strong></div>
+          <div class="char-skills">
+            <div class="skill-item"><span class="key-badge">J</span> Twin Daggers (8 dmg)</div>
+            <div class="skill-item"><span class="key-badge">K</span> Kunai Toss (18 dmg snaryad)</div>
+            <div class="skill-item"><span class="key-badge">L</span> Shadow Strike (30 dmg teleport)</div>
+            <div class="skill-item"><span class="key-badge">Space</span> Smoke Phase (Dodge)</div>
+          </div>
+        </div>
+
+        <!-- 3. Frost Mage -->
+        <div class="char-card" data-char="frost_mage">
+          <div class="char-avatar-box" style="background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(116, 185, 255, 0.2)); border: 1px solid #3498db;">
+            <span style="font-size: 58px;">❄️</span>
+          </div>
+          <span class="char-badge" style="background: rgba(52, 152, 219, 0.2); color: #3498db;">Zoner / Control</span>
+          <div class="char-name" style="color: #3498db;">Frost Mage</div>
+          <div class="char-desc">Muzli snaryadlar va maydonni sekinlashtiruvchi Blizzard Nova bilan dushmanni masofada ushlaydi.</div>
+          <div class="stat-row"><span>Jon (HP):</span><strong>100</strong></div>
+          <div class="stat-row"><span>Hujum kuchi:</span><strong>Masofaviy</strong></div>
+          <div class="stat-row"><span>Harakat tezligi:</span><strong>Standart</strong></div>
+          <div class="char-skills">
+            <div class="skill-item"><span class="key-badge">J</span> Frost Bolt (14 dmg snaryad)</div>
+            <div class="skill-item"><span class="key-badge">K</span> Ice Shard Wave (3x10 dmg)</div>
+            <div class="skill-item"><span class="key-badge">L</span> Blizzard Nova (32 dmg + Slow)</div>
+            <div class="skill-item"><span class="key-badge">Space</span> Glacial Blink (Dodge)</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; width: 100%; max-width: 400px;">
+        <button id="btn-back-from-char" class="btn btn-secondary">Ortga</button>
+        <button id="btn-confirm-char" class="btn btn-primary">Tasdiqlash</button>
+      </div>
+    </div>
+
+    <!-- 3. LOBBY EKRANI (Do'stlar xonasi) -->
+    <div id="screen-lobby" class="screen">
+      <div class="card" style="width: 100%; max-width: 720px;">
+        <div class="lobby-header">
+          <div>
+            <div style="font-size: 13px; color: var(--text-muted);">Xona kodi (Ulashish uchun bosing):</div>
+            <div id="lobby-room-code" class="room-code-tag" title="Nusxalash uchun bosing">CLASH</div>
+          </div>
+          <button id="btn-leave-lobby" class="btn btn-danger" style="width: auto; margin-bottom: 0;">Chiqish</button>
+        </div>
+
+        <div class="player-slots-grid" id="lobby-slots-container">
+          <!-- O'yinchilar slotlari dinamik joylashadi -->
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 16px;">
+          <button id="btn-toggle-ready" class="btn btn-primary">Tayyorman (Ready)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. ARENA JANG EKRANI -->
+    <div id="screen-arena" class="screen">
+      <div class="game-viewport">
+        <canvas id="game-canvas" width="960" height="540"></canvas>
+
+        <!-- Arena HUD -->
+        <div class="arena-hud">
+          <!-- P1 HUD (Chapda) -->
+          <div class="hud-player-box">
+            <div style="text-align: left;">
+              <div id="hud-p1-name" style="font-size: 13px; font-weight: 700; color: #fff;">P1</div>
+              <div id="hud-p1-char" style="font-size: 10px; color: var(--primary);">Blaze Knight</div>
+              <div class="round-pips" id="hud-p1-pips">
+                <div class="round-pip"></div>
+                <div class="round-pip"></div>
+              </div>
+            </div>
+            <div class="hud-hp-track">
+              <div id="hud-p1-hp" class="hud-hp-bar"></div>
+            </div>
+          </div>
+
+          <!-- Markaziy Taymer va Raund -->
+          <div class="hud-center-timer">
+            <span class="hud-round-label" id="hud-round-label">R1</span>
+            <span class="hud-timer-sec" id="hud-match-timer">60</span>
+          </div>
+
+          <!-- P2 HUD (O'ngda) -->
+          <div class="hud-player-box right">
+            <div style="text-align: right;">
+              <div id="hud-p2-name" style="font-size: 13px; font-weight: 700; color: #fff;">P2</div>
+              <div id="hud-p2-char" style="font-size: 10px; color: var(--accent-purple);">Shadow Ninja</div>
+              <div class="round-pips" id="hud-p2-pips" style="justify-content: flex-end;">
+                <div class="round-pip"></div>
+                <div class="round-pip"></div>
+              </div>
+            </div>
+            <div class="hud-hp-track">
+              <div id="hud-p2-hp" class="hud-hp-bar blue"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Ustidagi E'lonlar -->
+        <div id="canvas-announcement" class="canvas-announcement" style="display: none;">ROUND 1</div>
+      </div>
+
+      <!-- Boshqaruv tugmalari eslatmasi -->
+      <div class="controls-reminder">
+        <span>🎮 <strong>Boshqaruv:</strong> WASD — Harakat | W/Space — Sakrash | S — Platformadan tushish</span>
+        <span>⚔️ <strong>Jang:</strong> J — Yengil | K — Og'ir | L — Skill | Space — Dodge</span>
+        <button id="btn-toggle-debug" class="btn btn-secondary" style="width: auto; padding: 2px 8px; font-size: 11px; margin-bottom: 0;">F3 Debug</button>
+      </div>
+    </div>
+
+    <!-- 5. MATCH NATIJALARI EKRANI -->
+    <div id="screen-match-result" class="screen">
+      <div class="card result-card">
+        <div id="result-banner" class="result-banner victory">G'ALABA!</div>
+        <div id="result-mmr-badge" class="mmr-change-tag positive">+24 MMR (1224)</div>
+
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>O'yinchi</th>
+              <th>Raundlar</th>
+              <th>Yetkazilgan zarar</th>
+              <th>Knockoutlar</th>
+            </tr>
+          </thead>
+          <tbody id="result-stats-body">
+            <!-- Natijalar dinamik to'ldiriladi -->
+          </tbody>
+        </table>
+
+        <div style="display: flex; gap: 12px;">
+          <button id="btn-result-rematch" class="btn btn-primary">Qayta Jang Qilish</button>
+          <button id="btn-result-menu" class="btn btn-secondary">Bosh Menyu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD MODAL -->
+  <div id="modal-leaderboard" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="color: var(--primary);">🏆 Top Reyting (Leaderboard)</h3>
+        <button class="close-btn" id="btn-close-leaderboard">&times;</button>
+      </div>
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>O'yinchi</th>
+            <th>MMR</th>
+            <th>G'alabalar</th>
+            <th>Winrate</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-table-body">
+          <!-- Reytinglar -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- REPLAYS MODAL -->
+  <div id="modal-replays" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="color: var(--primary);">📹 So'nggi Match Replaylari</h3>
+        <button class="close-btn" id="btn-close-replays">&times;</button>
+      </div>
+      <div id="replays-list-container">
+        <!-- Replaylar ro'yxati -->
+      </div>
+    </div>
+  </div>
+
+  <!-- O'yin Skriptlari -->
+  <script src="shared/constants.js"></script>
+  <script src="shared/characters.js"></script>
+  <script src="shared/protocol.js"></script>
+  <script src="shared/physics.js"></script>
+  <script src="shared/combat.js"></script>
+
+  <script src="js/audio.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/prediction.js"></script>
+  <script src="js/interpolation.js"></script>
+  <script src="js/network.js"></script>
+  <script src="js/localGame.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
