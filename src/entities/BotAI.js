@@ -16,6 +16,7 @@ export class BotAI {
       dodge: false,
       block: false,
       taunt: false,
+      switchWeapon: false,
     };
   }
 
@@ -37,6 +38,7 @@ export class BotAI {
       dodge: false,
       block: false,
       taunt: false,
+      switchWeapon: false,
     };
 
     if (bot.isDead || opponent.isDead) return this.currentInput;
@@ -87,7 +89,16 @@ export class BotAI {
       this.currentInput.drop = true;
     }
 
-    // 4. Hujum qarorlari
+    // 4. Hujum va Qurol almashtirish qarorlari
+    if (bot.switchWeaponCooldown <= 0 && Math.random() < 0.08) {
+      // Masofaga qarab qurolni o'zgartirish
+      if (absDistX > 180 && bot.currentWeaponIndex === 0) {
+        this.currentInput.switchWeapon = true;
+      } else if (absDistX < 80 && bot.currentWeaponIndex !== 1) {
+        this.currentInput.switchWeapon = true;
+      }
+    }
+
     if (absDistX < 95 && absDistY < 60) {
       // Raqib zarba beryaptimi? Parry qilish imkoniyati
       if (opponent.isAttacking && Math.random() < (this.difficulty === 'hard' ? 0.75 : 0.35)) {

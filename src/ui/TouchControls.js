@@ -25,6 +25,7 @@ export class TouchControls {
         </div>
       </div>
       <div class="touch-buttons-zone">
+        <button class="t-btn t-btn-switch" data-action="switchWeapon">🔄<br><small>Qurol</small></button>
         <button class="t-btn t-btn-light" data-action="lightAttack">J<br><small>Yengil</small></button>
         <button class="t-btn t-btn-heavy" data-action="heavyAttack">K<br><small>Og'ir</small></button>
         <button class="t-btn t-btn-skill" data-action="skill">L<br><small>Skill</small></button>
@@ -104,6 +105,9 @@ export class TouchControls {
       btn.addEventListener('touchstart', (e) => {
         e.preventDefault();
         trigger(true);
+        if (action === 'switchWeapon') {
+          setTimeout(() => trigger(false), 80);
+        }
       }, { passive: false });
 
       btn.addEventListener('touchend', (e) => {

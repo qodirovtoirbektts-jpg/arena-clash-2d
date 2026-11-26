@@ -161,9 +161,11 @@ export class HUD {
   render(ctx, p1, p2, roundTime = 90) {
     if (!p1 || !p2) return;
 
-    // 1. Taktik Segmentli HP Barlar
+    // 1. Taktik Segmentli HP Barlar va Qurol Indikatorlari
     this.renderHealthBar(ctx, p1, 40, 36, false);
     this.renderHealthBar(ctx, p2, 1280 - 40 - 390, 36, true);
+    this.renderWeaponBadge(ctx, p1, 40, 66, false);
+    this.renderWeaponBadge(ctx, p2, 1280 - 40, 66, true);
     this.renderTimerAndRounds(ctx, roundTime);
 
     // 2. Dinamik Kombo Hisoblagichi
@@ -183,6 +185,47 @@ export class HUD {
     if (p1.hp < p1.maxHp * 0.25 && !p1.isDead) {
       this.renderVignette(ctx);
     }
+  }
+
+  renderWeaponBadge(ctx, fighter, x, y, isRight) {
+    if (!fighter || !fighter.getCurrentWeapon) return;
+    const weapon = fighter.getCurrentWeapon();
+    const weapons = fighter.heroConfig.weapons || [];
+    const currentIndex = fighter.currentWeaponIndex % Math.max(1, weapons.length);
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    const badgeWidth = 230;
+    const badgeHeight = 26;
+
+    // Chamfered burchakli fon
+    ctx.fillStyle = 'rgba(7, 12, 24, 0.90)';
+    ctx.strokeStyle = fighter.heroConfig.palette.glow || 'rgba(76, 201, 240, 0.4)';
+    ctx.lineWidth = 1.2;
+    ctx.fillRect(isRight ? -badgeWidth : 0, 0, badgeWidth, badgeHeight);
+    ctx.strokeRect(isRight ? -badgeWidth : 0, 0, badgeWidth, badgeHeight);
+
+    // Qahramon qurol nomi va piktogrammasi
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px "Orbitron", sans-serif';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = isRight ? 'right' : 'left';
+
+    const textX = isRight ? -12 : 12;
+    const label = `${weapon.icon} ${weapon.name.toUpperCase()}`;
+    ctx.fillText(label, textX, 13);
+
+    // 3 xil qurol indikator doiralari
+    const dotStartX = isRight ? -badgeWidth + 20 : badgeWidth - 44;
+    for (let i = 0; i < weapons.length; i++) {
+      ctx.fillStyle = i === currentIndex ? (fighter.heroConfig.palette.glow || '#00e5ff') : 'rgba(255, 255, 255, 0.25)';
+      ctx.beginPath();
+      ctx.arc(dotStartX + i * 11, 13, i === currentIndex ? 3.5 : 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore();
   }
 
   renderHealthBar(ctx, fighter, x, y, isRight) {

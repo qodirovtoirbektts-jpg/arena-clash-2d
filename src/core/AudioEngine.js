@@ -173,6 +173,45 @@ export class AudioEngine {
     });
   }
 
+  // Qurol almashtirish (Metallic Unsheathe & Swoosh)
+  playSwitchWeapon() {
+    if (!this.enabled || !this.ctx) return;
+    this.resume();
+    const t = this.ctx.currentTime;
+
+    // Metall tig' sharaqlashi
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(540, t);
+    osc.frequency.exponentialRampToValueAtTime(1420, t + 0.08);
+    osc.frequency.exponentialRampToValueAtTime(880, t + 0.20);
+
+    gain.gain.setValueAtTime(0.28, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+    osc.start(t);
+    osc.stop(t + 0.22);
+
+    // Havo shovqini
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = this.createNoiseBuffer(0.12);
+    if (noise.buffer) {
+      const nFilter = this.ctx.createBiquadFilter();
+      nFilter.type = 'highpass';
+      nFilter.frequency.setValueAtTime(1200, t);
+      const nGain = this.ctx.createGain();
+      nGain.gain.setValueAtTime(0.15, t);
+      nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      noise.connect(nFilter);
+      nFilter.connect(nGain);
+      nGain.connect(this.sfxGain);
+      noise.start(t);
+    }
+  }
+
   // 4. Qurollar To'qnashuvi (Weapon Clash Explosion & Sparks)
   playClash() {
     if (!this.enabled || !this.ctx) return;

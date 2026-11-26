@@ -851,24 +851,24 @@ canvas#gameCanvas {
 
 .touch-buttons-zone {
   position: absolute;
-  right: 24px;
-  bottom: 24px;
+  right: 20px;
+  bottom: 20px;
   display: grid;
-  grid-template-columns: repeat(3, 68px);
-  gap: 12px;
+  grid-template-columns: repeat(4, 62px);
+  gap: 10px;
   pointer-events: auto;
 }
 
 .t-btn {
-  width: 64px;
-  height: 64px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.25);
   background: rgba(11, 19, 36, 0.85);
   color: #ffffff;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -883,6 +883,15 @@ canvas#gameCanvas {
   border-color: var(--neon-cyan);
 }
 
+.t-btn-switch {
+  border-color: var(--neon-cyan);
+  background: rgba(0, 229, 255, 0.18);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.35);
+}
+.t-btn-switch:active {
+  background: rgba(0, 229, 255, 0.45);
+}
+
 .t-btn-light { border-color: var(--fire-glow); }
 .t-btn-heavy { border-color: var(--orange); }
 .t-btn-skill { border-color: var(--violet); }
@@ -895,4 +904,160 @@ canvas#gameCanvas {
   font-weight: 500;
   letter-spacing: 0.05em;
   color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Mobil Gorizontal Ekran Talabi (Landscape Orientation Overlay)
+   ========================================================================== */
+.orientation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(2, 4, 10, 0.98);
+  backdrop-filter: blur(24px);
+  z-index: 999999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+@media screen and (orientation: portrait) and (max-width: 900px) {
+  .orientation-overlay {
+    display: flex !important;
+  }
+}
+
+.orientation-overlay.active {
+  display: flex !important;
+}
+
+.orientation-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--neon-cyan);
+  clip-path: var(--clip-chamfer-lg);
+  padding: 36px 28px;
+  max-width: 440px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.25), inset 0 0 24px rgba(0, 229, 255, 0.1);
+  animation: pulseCardGlow 3s infinite ease-in-out;
+}
+
+@keyframes pulseCardGlow {
+  0%, 100% { box-shadow: 0 0 40px rgba(0, 229, 255, 0.25); border-color: rgba(0, 229, 255, 0.6); }
+  50% { box-shadow: 0 0 60px rgba(255, 90, 31, 0.35); border-color: rgba(255, 90, 31, 0.8); }
+}
+
+.phone-anim-box {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-device {
+  width: 38px;
+  height: 68px;
+  border: 3px solid #eaf6ff;
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: phoneRotateAnim 2.8s infinite ease-in-out;
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.5);
+  background: rgba(11, 19, 36, 0.8);
+}
+
+.phone-screen-light {
+  width: 26px;
+  height: 48px;
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.4), rgba(76, 201, 240, 0.1));
+  border-radius: 4px;
+}
+
+.phone-notch {
+  position: absolute;
+  top: 3px;
+  width: 10px;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 1px;
+}
+
+@keyframes phoneRotateAnim {
+  0%, 25% { transform: rotate(0deg); }
+  60%, 85% { transform: rotate(-90deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.rotate-hint-arrow {
+  position: absolute;
+  right: -8px;
+  bottom: -4px;
+  font-size: 1.8rem;
+  color: var(--neon-cyan);
+  animation: spinHint 2.8s infinite linear;
+}
+
+@keyframes spinHint {
+  0% { opacity: 0.3; transform: rotate(0deg); }
+  50% { opacity: 1; transform: rotate(-180deg); }
+  100% { opacity: 0.3; transform: rotate(-360deg); }
+}
+
+.orientation-tag {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--orange);
+  background: rgba(255, 144, 64, 0.12);
+  padding: 4px 12px;
+  border-radius: 4px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255, 144, 64, 0.3);
+}
+
+.orientation-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  margin-bottom: 14px;
+  line-height: 1.35;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.4);
+}
+
+.orientation-desc {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  margin-bottom: 22px;
+}
+
+.orientation-brand-tag {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 14px;
+  width: 100%;
+}
+
+.orientation-brand-tag span {
+  color: var(--neon-cyan);
+  font-weight: 700;
 }

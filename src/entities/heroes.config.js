@@ -27,6 +27,13 @@ export const HEROES_CONFIG = {
       weaponAura: "#FF4500",   // Olov aulasi
     },
 
+    // 3 xil qurollar to'plami (1-tugma bilan almashtiriladi)
+    weapons: [
+      { id: "sword", name: "Olovli Katta Qilich", icon: "⚔️", damage: 12, heavyDamage: 24, range: 74, knockback: 380, description: "Muvozanatli og'ir qilich" },
+      { id: "hammer", name: "Magma Jang Bolg'asi", icon: "🔨", damage: 17, heavyDamage: 34, range: 56, knockback: 500, description: "Vazmin, kuchli ezuvchi bolg'a" },
+      { id: "halberd", name: "Olovli Halberd Nayza", icon: "🔱", damage: 11, heavyDamage: 22, range: 96, knockback: 300, description: "Uzoq masofali zarba nayzasi" },
+    ],
+
     // Qurol va zarba parametrlari
     combat: {
       lightAttack: {
@@ -123,6 +130,13 @@ export const HEROES_CONFIG = {
       weaponAura: "#A855F7",   // Soya tutuni
     },
 
+    // 3 xil qurollar to'plami (1-tugma bilan almashtiriladi)
+    weapons: [
+      { id: "katana", name: "Ninjato Soya Qilichi", icon: "🗡️", damage: 9, heavyDamage: 20, range: 64, knockback: 240, description: "O'tkir tezkor katana qilichi" },
+      { id: "daggers", name: "Egizak Soya Xanjarlari", icon: "⚔️", damage: 7, heavyDamage: 16, range: 48, knockback: 180, description: "Chaqqon ketma-ket kesuvchi xanjarlar" },
+      { id: "kusarigama", name: "Kusarigama Zanjirli O'roq", icon: "⛓️", damage: 11, heavyDamage: 22, range: 92, knockback: 350, description: "Uzoq masofali zanjirli o'roq" },
+    ],
+
     combat: {
       lightAttack: {
         damage: 7,             // 7x2 zarba
@@ -218,6 +232,13 @@ export const HEROES_CONFIG = {
       weaponMetal: "#94A3B8",  // Kristall muz asosi
       weaponAura: "#38BDF8",   // Qirov zarralari
     },
+
+    // 3 xil qurollar to'plami (1-tugma bilan almashtiriladi)
+    weapons: [
+      { id: "staff", name: "Kristall Muz Asosi", icon: "🪄", damage: 9, heavyDamage: 21, range: 240, knockback: 220, isRanged: true, description: "Sehrli muz o'qlari otuvchi hassa" },
+      { id: "rapier", name: "Muz Kristall Shpagasi", icon: "🤺", damage: 13, heavyDamage: 25, range: 68, knockback: 280, isRanged: false, description: "Muzlatuvchi o'tkir sanchish" },
+      { id: "glaive", name: "Muzli Arktik Kosa", icon: "🪓", damage: 15, heavyDamage: 28, range: 88, knockback: 380, isRanged: false, description: "Keng radiusli muz zarbasi" },
+    ],
 
     combat: {
       lightAttack: {

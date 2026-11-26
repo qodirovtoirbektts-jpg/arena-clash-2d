@@ -242,15 +242,18 @@ function checkCombat(attacker, defender) {
     hitbox.y < hurtbox.y + hurtbox.height &&
     hitbox.y + hitbox.height > hurtbox.y
   ) {
+    const currentWeapon = attacker.getCurrentWeapon ? attacker.getCurrentWeapon() : null;
     let dmg = 10;
     let kx = 180;
     let ky = -90;
 
     if (attacker.state === 'attack_light') {
-      dmg = attacker.comboStep === 3 ? 15 : 10;
+      const baseDmg = currentWeapon ? currentWeapon.damage : 10;
+      dmg = attacker.comboStep === 3 ? Math.round(baseDmg * 1.4) : baseDmg;
+      kx = currentWeapon ? currentWeapon.knockback * 0.55 : 180;
     } else if (attacker.state === 'attack_heavy') {
-      dmg = 22;
-      kx = 380;
+      dmg = currentWeapon ? currentWeapon.heavyDamage : 22;
+      kx = currentWeapon ? currentWeapon.knockback : 380;
       ky = -220;
     } else if (attacker.state === 'skill') {
       dmg = attacker.heroConfig.combat.skill.damage || 28;
@@ -380,5 +383,21 @@ const touchControls = new TouchControls(uiRoot);
 // Game Loop ni ishga tushirish
 const loop = new GameLoop(onUpdate, onRender);
 loop.start();
+
+// Mobil ekranining gorizontal (Landscape) holatini tekshirish
+function checkOrientation() {
+  const overlay = document.getElementById('orientation-overlay');
+  if (!overlay) return;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 900);
+  if (isPortrait && isTouch) {
+    overlay.classList.add('active');
+  } else {
+    overlay.classList.remove('active');
+  }
+}
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', checkOrientation);
+checkOrientation();
 
 console.log(`${uz.appName} v3.2 — Cyber-Tactical Arena to'liq ishga tushirildi!`);

@@ -60,6 +60,10 @@ export class Fighter {
     this.width = 44;
     this.height = 104;
 
+    // 3 xil qurollar tizimi
+    this.currentWeaponIndex = 0;
+    this.switchWeaponCooldown = 0;
+
     // Shadow Fight uslubidagi sharpalar (Afterimages / Ghost trails)
     this.afterimages = [];
     this.afterimageTimer = 0;
@@ -92,13 +96,56 @@ export class Fighter {
     };
   }
 
+  getCurrentWeapon() {
+    const weapons = this.heroConfig.weapons;
+    if (!weapons || weapons.length === 0) {
+      return { id: 'default', name: 'Standart Qurol', icon: '⚔️', damage: 10, heavyDamage: 20, range: 68, knockback: 320 };
+    }
+    return weapons[this.currentWeaponIndex % weapons.length];
+  }
+
+  switchWeapon(audio, particles) {
+    if (this.isDead) return;
+    const weapons = this.heroConfig.weapons;
+    if (!weapons || weapons.length <= 1) return;
+
+    this.currentWeaponIndex = (this.currentWeaponIndex + 1) % weapons.length;
+    this.switchWeaponCooldown = 0.28;
+    const currentWeapon = this.getCurrentWeapon();
+
+    if (audio && audio.playSwitchWeapon) {
+      audio.playSwitchWeapon();
+    } else if (audio && audio.playParry) {
+      audio.playParry();
+    }
+
+    if (particles) {
+      particles.emit('spark', this.x + this.facing * 16, this.y - 45, 14, {
+        color: this.heroConfig.palette.glow || '#00e5ff',
+        speed: 140
+      });
+      particles.addDamageText(
+        this.x,
+        this.y - 82,
+        `${currentWeapon.icon} ${currentWeapon.name.toUpperCase()}`,
+        this.heroConfig.palette.glow || '#ffd166',
+        true
+      );
+    }
+  }
+
   // Hujum zarbasi berilayotgan hitbox
   getHitbox() {
     if (!this.isAttacking) return null;
-    let cfg = this.heroConfig.combat.lightAttack.hitbox;
-    if (this.state === 'attack_heavy') cfg = this.heroConfig.combat.heavyAttack.hitbox;
-    if (this.state === 'skill') cfg = this.heroConfig.combat.skill.hitbox;
+    let cfg = { ...this.heroConfig.combat.lightAttack.hitbox };
+    if (this.state === 'attack_heavy') cfg = { ...this.heroConfig.combat.heavyAttack.hitbox };
+    if (this.state === 'skill') cfg = { ...this.heroConfig.combat.skill.hitbox };
     if (!cfg) return null;
+
+    const weapon = this.getCurrentWeapon();
+    if (weapon && weapon.range && this.state !== 'skill') {
+      cfg.width = weapon.range;
+    }
 
     return {
       x: this.facing === 1 ? this.x + cfg.offsetX : this.x - cfg.offsetX - cfg.width,
@@ -162,6 +209,7 @@ export class Fighter {
     if (this.damageBuffTimer > 0) this.damageBuffTimer -= dt;
     if (this.slowTimer > 0) this.slowTimer -= dt;
     if (this.hitFlashTimer > 0) this.hitFlashTimer -= dt;
+    if (this.switchWeaponCooldown > 0) this.switchWeaponCooldown -= dt;
 
     // Sharpalar (Afterimages) yangilanishi
     for (let i = this.afterimages.length - 1; i >= 0; i--) {
@@ -238,6 +286,11 @@ export class Fighter {
 
   handleInput(dt, input, arenaObjects, projectiles, audio, particles) {
     if (!input) return;
+
+    // Qurol almashtirish (1 ta tugma: Q yoki Numpad7 / Mobil Sensor)
+    if (input.switchWeapon && this.switchWeaponCooldown <= 0) {
+      this.switchWeapon(audio, particles);
+    }
 
     // Blok / Parry
     if (input.block && this.stamina > 10) {
@@ -348,8 +401,10 @@ export class Fighter {
     this.stateTimer = this.heroConfig.combat.lightAttack.duration;
     if (audio) audio.playSlash(false);
 
-    // Frost Mage masofadan o'q otadi
-    if (this.heroConfig.id === 'frost_mage') {
+    const weapon = this.getCurrentWeapon();
+
+    // Frost Mage: Agar hassa (staff) tanlangan bo'lsa muz o'qi otadi; rapier yoki glaive bilan yaqin jang qiladi!
+    if (this.heroConfig.id === 'frost_mage' && weapon.id === 'staff') {
       projectiles.push(new (projectiles.ProjectileClass || Object)({
         ownerId: this.id,
         type: 'frost_bolt',
@@ -357,7 +412,7 @@ export class Fighter {
         x: this.x + this.facing * 20,
         y: this.y - 35,
         vx: this.facing * 520,
-        damage: 9,
+        damage: weapon.damage || 9,
       }));
     }
   }
@@ -365,6 +420,7 @@ export class Fighter {
   executeHeavyAttack(audio, projectiles, particles) {
     this.totalAttacksFired++;
     const cfg = this.heroConfig.combat.heavyAttack;
+    const weapon = this.getCurrentWeapon();
     this.state = 'attack_heavy';
     this.stateTimer = cfg.duration;
     this.heavyCooldown = cfg.cooldown;
@@ -372,7 +428,7 @@ export class Fighter {
     this.staminaRegenDelay = 0.8;
     if (audio) audio.playSlash(true);
 
-    if (cfg.isProjectile) {
+    if (cfg.isProjectile && (this.heroConfig.id !== 'frost_mage' || weapon.id === 'staff')) {
       projectiles.push(new (projectiles.ProjectileClass || Object)({
         ownerId: this.id,
         type: this.heroConfig.id === 'shadow_ninja' ? 'kunai' : 'frost_shard',
@@ -380,7 +436,7 @@ export class Fighter {
         x: this.x + this.facing * 24,
         y: this.y - 35,
         vx: this.facing * (cfg.projectileSpeed || 600),
-        damage: cfg.damage,
+        damage: weapon.heavyDamage || cfg.damage,
       }));
     }
   }

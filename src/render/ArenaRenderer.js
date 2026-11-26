@@ -88,6 +88,24 @@ export class ArenaRenderer {
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, 1280, 720);
 
+    // "Toxa Ai Studio" Arena Orqa Fonidagi Neon / Tosh Yozuvi
+    ctx.save();
+    ctx.translate(640, 110 - (camera.y * 0.08));
+    ctx.font = '900 32px "Orbitron", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(255, 90, 31, 0.45)';
+    ctx.shadowColor = '#ff5a1f';
+    ctx.shadowBlur = 18;
+    ctx.letterSpacing = '0.2em';
+    ctx.fillText('TOXA AI STUDIO', 0, 0);
+
+    ctx.font = '600 12px "Orbitron", sans-serif';
+    ctx.fillStyle = 'rgba(234, 246, 255, 0.35)';
+    ctx.shadowBlur = 8;
+    ctx.fillText('TACTICAL BATTLEGROUND // CHAMPIONSHIP', 0, 26);
+    ctx.restore();
+
     // Qadimiy tosh qal'a devorlari va minoralar (Parallax layer 1)
     ctx.fillStyle = 'rgba(24, 12, 14, 0.75)';
     for (let i = 0; i < 6; i++) {
@@ -176,6 +194,19 @@ export class ArenaRenderer {
     ctx.shadowColor = '#ff5a1f';
     ctx.shadowBlur = 16;
     ctx.fillRect(0, groundY, 1280, 4);
+
+    // Zaminga o'yilgan "TOXA AI STUDIO" Arena Medallioni
+    ctx.save();
+    ctx.translate(640, groundY + 68);
+    ctx.font = '900 24px "Orbitron", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(255, 90, 31, 0.35)';
+    ctx.shadowColor = '#ff5a1f';
+    ctx.shadowBlur = 14;
+    ctx.fillText('⚡ TOXA AI STUDIO • CYBER ARENA ⚡', 0, 0);
+    ctx.restore();
+
     ctx.restore();
 
     // 5. Zamin Decallari (Haqiqiy jang izlari — Scorch, Frost, Blood/Shadow)

@@ -27,8 +27,8 @@ export class MenuManager {
     this.menuElement.innerHTML = `
       <div class="menu-top-bar">
         <div class="menu-brand">
-          <span class="menu-brand-tag">ARENA CLASH 2D v3.2</span>
-          <h1>JANG MAYDONI</h1>
+          <span class="menu-brand-tag">TOXA AI STUDIO</span>
+          <h1>ARENA CLASH 2D</h1>
         </div>
         <div class="menu-top-actions">
           <button class="tactical-btn" id="btn-open-settings">
@@ -92,7 +92,7 @@ export class MenuManager {
 
       <div class="menu-bottom-dock" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
         <div class="controls-hint" style="color: var(--text-dim); font-family: var(--font-display); font-size: 0.88rem;">
-          [Boshqaruv]: <b>W A S D</b> (Harakat/Sakrash) + <b>J</b> (Yengil) <b>K</b> (Og'ir) <b>L</b> (Skill) <b>Shift</b> (Dodge) <b>U</b> (Parry)
+          [Boshqaruv]: <b>W A S D</b> (Harakat/Sakrash) + <b>J</b> (Yengil) <b>K</b> (Og'ir) <b>L</b> (Skill) <b>Q</b> (Qurol) <b>Shift</b> (Dodge) <b>U</b> (Parry)
         </div>
 
         <button id="btn-start-fight" class="tactical-btn primary huge">

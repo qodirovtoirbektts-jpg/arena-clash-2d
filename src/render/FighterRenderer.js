@@ -20,7 +20,7 @@ export class FighterRenderer {
         ctx.fillStyle = '#07090f';
         ctx.shadowColor = ghost.glow || '#a855f7';
         ctx.shadowBlur = 16;
-        this.drawFighterBody(ctx, ghost.heroId, ghost.state, false, true);
+        this.drawFighterBody(ctx, ghost.heroId, ghost.state, false, true, 0);
         ctx.restore();
       }
     }
@@ -48,7 +48,7 @@ export class FighterRenderer {
       ctx.fillStyle = fighter.isDead ? '#050508' : '#e11d48';
       ctx.shadowColor = '#ff0033';
       ctx.shadowBlur = 28;
-      this.drawFighterBody(ctx, heroConfig.id, state, false, true);
+      this.drawFighterBody(ctx, heroConfig.id, state, false, true, fighter.currentWeaponIndex || 0);
       ctx.restore();
       return;
     }
@@ -104,7 +104,7 @@ export class FighterRenderer {
     this.drawShadowCloth(ctx, fighter, isHitFlash);
 
     // 6. Inson Anatomiyasidagi Jangchi (Shadow Fight uslubidagi 7.5 bosh nisbati)
-    this.drawFighterBody(ctx, heroConfig.id, state, isHitFlash, false);
+    this.drawFighterBody(ctx, heroConfig.id, state, isHitFlash, false, fighter.currentWeaponIndex || 0);
 
     // 7. Qilich Harakati va Hujum Yoyi Smearlari (Attack Slash Arcs)
     this.drawAttackSmear(ctx, fighter);
@@ -113,7 +113,7 @@ export class FighterRenderer {
   }
 
   // Shadow Fight uslubidagi Inson Anatomiyasi (Proportional 7.5-head athletic build)
-  drawFighterBody(ctx, heroId, state, isHitFlash, isGhost = false) {
+  drawFighterBody(ctx, heroId, state, isHitFlash, isGhost = false, weaponIndex = 0) {
     const isAttacking = ['attack_light', 'attack_heavy', 'skill'].includes(state);
     const isHeavy = state === 'attack_heavy';
     const isBlocking = state === 'block';
@@ -305,80 +305,287 @@ export class FighterRenderer {
 
     // Qurolni chizish (Handheld Ninja/Knight Weapons)
     if (!isGhost) {
-      this.drawHandheldWeapon(ctx, heroId, isHitFlash, accentColor);
+      this.drawHandheldWeapon(ctx, heroId, isHitFlash, accentColor, weaponIndex);
     }
     ctx.restore();
   }
 
-  // Qurollar: Ninja Xanjari / Qilichi, Ritsar Katana / Qilichi, Sehrgar Asosi
-  drawHandheldWeapon(ctx, heroId, isHitFlash, accentColor) {
+  // Qurollar: Har bir qahramon uchun 3 xil to'liq qurollar to'plami
+  drawHandheldWeapon(ctx, heroId, isHitFlash, accentColor, weaponIndex = 0) {
     ctx.save();
     ctx.translate(5, 22);
 
     if (heroId === 'shadow_ninja') {
-      // Egri Ninja Qilichi (Ninjato / Katana)
-      ctx.fillStyle = isHitFlash ? '#fff' : '#c4b5fd';
-      ctx.shadowColor = accentColor;
-      ctx.shadowBlur = 16;
+      if (weaponIndex === 0) {
+        // 1. Egri Ninja Qilichi (Ninjato / Katana)
+        ctx.fillStyle = isHitFlash ? '#fff' : '#c4b5fd';
+        ctx.shadowColor = accentColor;
+        ctx.shadowBlur = 18;
 
-      ctx.beginPath();
-      ctx.moveTo(-2, 0);
-      ctx.quadraticCurveTo(28, -20, 68, -12);
-      ctx.quadraticCurveTo(34, -4, 0, 4);
-      ctx.closePath();
-      ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-2, 0);
+        ctx.quadraticCurveTo(28, -20, 68, -12);
+        ctx.quadraticCurveTo(34, -4, 0, 4);
+        ctx.closePath();
+        ctx.fill();
 
-      // Dasta va Tsuba gardasi
-      ctx.fillStyle = '#1e1b4b';
-      ctx.fillRect(-12, -2, 12, 6);
-      ctx.fillStyle = accentColor;
-      ctx.fillRect(-2, -6, 4, 14);
+        // Dasta va Tsuba gardasi
+        ctx.fillStyle = '#1e1b4b';
+        ctx.fillRect(-14, -2, 14, 6);
+        ctx.fillStyle = accentColor;
+        ctx.fillRect(-2, -7, 4, 16);
+      } else if (weaponIndex === 1) {
+        // 2. Egizak Soya Xanjarlari (Dual Tactical Trench Daggers)
+        ctx.fillStyle = isHitFlash ? '#fff' : '#e9d5ff';
+        ctx.shadowColor = accentColor;
+        ctx.shadowBlur = 16;
+
+        // Oldingi xanjar (Asosiy qo'l)
+        ctx.beginPath();
+        ctx.moveTo(0, -4);
+        ctx.lineTo(38, -10);
+        ctx.lineTo(34, -2);
+        ctx.lineTo(0, 4);
+        ctx.closePath();
+        ctx.fill();
+
+        // Dasta va tishli garda
+        ctx.fillStyle = '#2e1065';
+        ctx.fillRect(-10, -3, 10, 6);
+        ctx.fillStyle = accentColor;
+        ctx.fillRect(-2, -6, 3, 12);
+
+        // Ikkinchi (orqa qo'ldagi) xanjar sharpasi
+        ctx.save();
+        ctx.translate(-14, 6);
+        ctx.rotate(0.65);
+        ctx.fillStyle = 'rgba(168, 85, 247, 0.85)';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(28, -6);
+        ctx.lineTo(24, 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      } else {
+        // 3. Kusarigama Zanjirli O'roq (Chain Scythe & Hanging Weight)
+        ctx.fillStyle = isHitFlash ? '#fff' : '#d8b4fe';
+        ctx.shadowColor = accentColor;
+        ctx.shadowBlur = 18;
+
+        // O'roq dastasi (Kama handle)
+        ctx.fillStyle = '#1f1635';
+        ctx.fillRect(-4, -10, 8, 36);
+
+        // O'roqning yarimoy egri tig'i
+        ctx.fillStyle = isHitFlash ? '#fff' : '#c084fc';
+        ctx.beginPath();
+        ctx.moveTo(2, -10);
+        ctx.quadraticCurveTo(24, -32, 52, -22);
+        ctx.quadraticCurveTo(28, -14, 2, -4);
+        ctx.closePath();
+        ctx.fill();
+
+        // Zanjir halqalari (Hanging chain links)
+        ctx.strokeStyle = '#9333ea';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        let chainX = -2;
+        let chainY = 26;
+        for (let i = 0; i < 5; i++) {
+          const sway = Math.sin(this.animTime * 6 + i) * 3;
+          ctx.lineTo(chainX + sway, chainY + i * 8);
+        }
+        ctx.stroke();
+
+        // Zanjir uchidagi vazmin tosh / po'lat yuk (Fundo Weight)
+        const finalSway = Math.sin(this.animTime * 6 + 5) * 3;
+        ctx.fillStyle = accentColor;
+        ctx.beginPath();
+        ctx.arc(chainX + finalSway, chainY + 44, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
     } else if (heroId === 'blaze_knight') {
-      // Og'ir Olovli Nodachi / Katta Qilich
-      ctx.fillStyle = isHitFlash ? '#fff' : '#fed7aa';
-      ctx.shadowColor = accentColor;
-      ctx.shadowBlur = 18;
+      if (weaponIndex === 0) {
+        // 1. Olovli Katta Qilich (Flame Greatsword)
+        ctx.fillStyle = isHitFlash ? '#fff' : '#fed7aa';
+        ctx.shadowColor = accentColor;
+        ctx.shadowBlur = 20;
 
-      ctx.fillRect(0, -7, 72, 14);
-      // Uchi
-      ctx.beginPath();
-      ctx.moveTo(72, -7);
-      ctx.lineTo(88, 0);
-      ctx.lineTo(72, 7);
-      ctx.closePath();
-      ctx.fill();
+        ctx.fillRect(0, -7, 72, 14);
+        // Uchi
+        ctx.beginPath();
+        ctx.moveTo(72, -7);
+        ctx.lineTo(88, 0);
+        ctx.lineTo(72, 7);
+        ctx.closePath();
+        ctx.fill();
 
-      // Magma o'yig'i
-      ctx.strokeStyle = '#ea580c';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(4, -4, 64, 8);
+        // Magma o'yig'i
+        ctx.strokeStyle = '#ea580c';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(4, -4, 64, 8);
 
-      // Gardasi
-      ctx.fillStyle = '#292524';
-      ctx.fillRect(-4, -16, 8, 32);
-      // Dasta
-      ctx.fillStyle = '#44403c';
-      ctx.fillRect(-18, -4, 14, 8);
+        // Gardasi
+        ctx.fillStyle = '#292524';
+        ctx.fillRect(-4, -16, 8, 32);
+        // Dasta
+        ctx.fillStyle = '#44403c';
+        ctx.fillRect(-18, -4, 14, 8);
+      } else if (weaponIndex === 1) {
+        // 2. Magma Jang Bolg'asi (Magma War Hammer)
+        // Bolg'a dastasi
+        ctx.fillStyle = '#292524';
+        ctx.fillRect(-8, -4, 52, 8);
+        ctx.fillStyle = accentColor;
+        ctx.fillRect(-14, -5, 8, 10);
+
+        // Katta to'rtburchak bolg'a boshi (Massive Impact Block)
+        ctx.fillStyle = isHitFlash ? '#fff' : '#1c1917';
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = accentColor;
+        ctx.shadowBlur = 22;
+
+        ctx.fillRect(44, -22, 28, 44);
+        ctx.strokeRect(44, -22, 28, 44);
+
+        // Magma yoriqlari
+        ctx.fillStyle = '#ff7a00';
+        ctx.beginPath();
+        ctx.moveTo(48, -12);
+        ctx.lineTo(62, -4);
+        ctx.lineTo(54, 8);
+        ctx.lineTo(68, 16);
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Orqa zirh teshar nayza (Armor-Piercing Spike)
+        ctx.fillStyle = '#44403c';
+        ctx.beginPath();
+        ctx.moveTo(44, -6);
+        ctx.lineTo(30, 0);
+        ctx.lineTo(44, 6);
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        // 3. Olovli Halberd Nayza (Fire Halberd / Spear)
+        // Uzun nayza dastasi (Polearm shaft)
+        ctx.fillStyle = '#44403c';
+        ctx.fillRect(-22, -3, 102, 6);
+
+        // Nayza uchi (Diamond Spearhead)
+        ctx.fillStyle = isHitFlash ? '#fff' : '#fed7aa';
+        ctx.shadowColor = accentColor;
+        ctx.shadowBlur = 22;
+        ctx.beginPath();
+        ctx.moveTo(80, -6);
+        ctx.lineTo(108, 0);
+        ctx.lineTo(80, 6);
+        ctx.closePath();
+        ctx.fill();
+
+        // Yon o'roq/bolta tig'i (Side Crescent Blade)
+        ctx.fillStyle = '#ea580c';
+        ctx.beginPath();
+        ctx.moveTo(68, -3);
+        ctx.quadraticCurveTo(86, -26, 62, -30);
+        ctx.quadraticCurveTo(70, -14, 68, -3);
+        ctx.closePath();
+        ctx.fill();
+
+        // Oltin halqalar
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(50, -4, 4, 8);
+        ctx.fillRect(72, -4, 4, 8);
+      }
     } else {
-      // Kristall Muz Naginata Tayog'i
-      ctx.strokeStyle = isHitFlash ? '#fff' : '#94a3b8';
-      ctx.lineWidth = 5;
-      ctx.beginPath();
-      ctx.moveTo(-18, 30);
-      ctx.lineTo(24, -48);
-      ctx.stroke();
+      // FROST MAGE
+      if (weaponIndex === 0) {
+        // 1. Kristall Muz Asosi (Crystal Frost Staff)
+        ctx.strokeStyle = isHitFlash ? '#fff' : '#94a3b8';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(-18, 30);
+        ctx.lineTo(26, -52);
+        ctx.stroke();
 
-      // Kristall uch
-      ctx.fillStyle = accentColor;
-      ctx.shadowColor = accentColor;
-      ctx.shadowBlur = 20;
-      ctx.beginPath();
-      ctx.moveTo(24, -48);
-      ctx.lineTo(34, -62);
-      ctx.lineTo(24, -76);
-      ctx.lineTo(14, -62);
-      ctx.closePath();
-      ctx.fill();
+        // Sehrli kristall uch (Floating Cyan Octahedron Gem)
+        ctx.fillStyle = accentColor;
+        ctx.shadowColor = accentColor;
+        ctx.shadowBlur = 24;
+        ctx.beginPath();
+        ctx.moveTo(26, -52);
+        ctx.lineTo(36, -66);
+        ctx.lineTo(26, -82);
+        ctx.lineTo(16, -66);
+        ctx.closePath();
+        ctx.fill();
+
+        // Aylanuvchi muz parchalari (Orbiting frost shards)
+        const rot = this.animTime * 5;
+        for (let i = 0; i < 3; i++) {
+          const a = rot + (i * Math.PI * 2) / 3;
+          const ox = 26 + Math.cos(a) * 16;
+          const oy = -66 + Math.sin(a) * 8;
+          ctx.fillStyle = '#e0f2fe';
+          ctx.beginPath();
+          ctx.arc(ox, oy, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (weaponIndex === 1) {
+        // 2. Muz Kristall Shpagasi (Glacial Ice Rapier)
+        ctx.fillStyle = isHitFlash ? '#fff' : '#e0f2fe';
+        ctx.shadowColor = accentColor;
+        ctx.shadowBlur = 20;
+
+        // O'tkir ingichka tig'
+        ctx.beginPath();
+        ctx.moveTo(0, -2);
+        ctx.lineTo(76, 0);
+        ctx.lineTo(0, 2);
+        ctx.closePath();
+        ctx.fill();
+
+        // Shpagadagi yarimoy qirovli garda (Swept Basket Hilt)
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(-2, 0, 10, -Math.PI * 0.5, Math.PI * 0.5);
+        ctx.stroke();
+
+        // Dasta
+        ctx.fillStyle = '#0e1e3a';
+        ctx.fillRect(-14, -2, 12, 4);
+      } else {
+        // 3. Muzli Arktik Kosa / Glaive (Frost Naginata / Scythe)
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(-20, 20);
+        ctx.lineTo(36, -42);
+        ctx.stroke();
+
+        // Keng yarimoy muz tig'i
+        ctx.fillStyle = isHitFlash ? '#fff' : 'rgba(56, 189, 248, 0.9)';
+        ctx.shadowColor = accentColor;
+        ctx.shadowBlur = 22;
+        ctx.beginPath();
+        ctx.moveTo(34, -40);
+        ctx.quadraticCurveTo(68, -72, 88, -50);
+        ctx.quadraticCurveTo(62, -48, 40, -32);
+        ctx.closePath();
+        ctx.fill();
+
+        // Arktik tishlar
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(56, -60);
+        ctx.lineTo(66, -68);
+        ctx.lineTo(62, -56);
+        ctx.closePath();
+        ctx.fill();
+      }
     }
     ctx.restore();
   }

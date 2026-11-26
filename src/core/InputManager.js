@@ -23,6 +23,7 @@ export class InputManager {
       dodge: false,
       block: false,
       taunt: false,
+      switchWeapon: false,
     };
 
     // Debug rejimi faqat ?debug=1 bo'lganda faollashadi
@@ -41,6 +42,7 @@ export class InputManager {
         dodge: ['ShiftLeft', 'ShiftRight'], // Qat'iy Shift — Dodge (Space emas!)
         block: ['KeyU'],
         taunt: ['KeyT'],
+        switchWeapon: ['KeyQ'], // 1 ta tugma bilan qurol almashtirish
       },
       p2: {
         moveLeft: ['ArrowLeft'],
@@ -53,6 +55,7 @@ export class InputManager {
         dodge: ['Numpad0', 'Period'],
         block: ['Numpad4', 'Slash'],
         taunt: ['Numpad5', 'Semicolon'],
+        switchWeapon: ['Numpad7', 'KeyO'],
       },
     };
 
@@ -179,6 +182,7 @@ export class InputManager {
       dodge: bindings.dodge.some((k) => this.keys.get(k)) || (isP1 && this.touchStates.dodge),
       block: bindings.block.some((k) => this.keys.get(k)) || (isP1 && this.touchStates.block),
       taunt: bindings.taunt.some((k) => this.keys.get(k)) || (isP1 && this.touchStates.taunt),
+      switchWeapon: (bindings.switchWeapon && bindings.switchWeapon.some((k) => this.keys.get(k))) || (isP1 && this.touchStates.switchWeapon),
     };
   }
 
