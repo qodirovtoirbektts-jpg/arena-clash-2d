@@ -30,7 +30,7 @@ const particleSystem = new ParticleSystem(250);
 const arenaRenderer = new ArenaRenderer();
 const fighterRenderer = new FighterRenderer();
 const arenaObjects = new ArenaObjects();
-const hud = new HUD();
+const hud = new HUD(uiRoot); // Live Comms, Mini-Radar, Toast Stack
 const botAI = new BotAI('medium');
 const attractBot1 = new BotAI('hard');
 const attractBot2 = new BotAI('hard');
@@ -57,11 +57,12 @@ function startMatch(mode, heroP1, heroP2) {
   hud.p1Wins = 0;
   hud.p2Wins = 0;
 
-  p1 = new Fighter('p1', mode === 'localP2' ? '1-O\'yinchi' : 'Siz', heroP1, 380, 1);
-  p2 = new Fighter('p2', mode === 'localP2' ? '2-O\'yinchi' : 'AI Gladiator', heroP2, 900, -1);
+  p1 = new Fighter('p1', mode === 'localP2' ? '1-O\'YINCHI' : 'SIZ', heroP1, 380, 1);
+  p2 = new Fighter('p2', mode === 'localP2' ? '2-O\'YINCHI' : 'AI GLADIATOR', heroP2, 900, -1);
   projectiles = [];
   projectiles.ProjectileClass = Projectile;
 
+  hud.addToast('DUEL BOSHLANDI // ARENA ENGAGED', 'gold');
   startRound();
 }
 
@@ -95,6 +96,8 @@ function startRound() {
   projectiles.ProjectileClass = Projectile;
 
   hud.showBanner(`RAUND ${round} — JANG!`, 1.8);
+  hud.setCommsMessage(`RAUND ${round} // JANG HARAKATLARI BOSHLANDI`);
+
   setTimeout(() => {
     if (matchState === 'round_start') {
       matchState = 'playing';
@@ -114,11 +117,13 @@ function onRoundWon(winner, loser) {
   isAnimeKo = true;
   animeKoTimer = 0.55;
   camera.triggerKo(loser);
-  camera.triggerShake(18);
+  camera.triggerShake(20);
   audioEngine.playKo();
   loop.setTimeScale(0.2, 0.9);
 
-  hud.showBanner(`${winner.name} G'ALABA QOZONDI!`, 2.2);
+  hud.showBanner(`${winner.name} G'ALABA QOZONDI!`, 2.2, 'hazard');
+  hud.setCommsMessage(`K.O. QAYD ETILDI // G'OLIB: ${winner.name}`);
+  hud.addToast(`K.O. FINISHER // ${winner.name} G'ALABA QOZONDI!`, 'crimson');
 }
 
 // Fixed Update sikli (60Hz)
@@ -126,8 +131,9 @@ function onUpdate(dt) {
   inputManager.update();
   camera.update(dt, p1, p2);
   particleSystem.update(dt);
+  arenaRenderer.update(dt);
   arenaObjects.update(dt, particleSystem);
-  hud.update(dt);
+  hud.update(dt, p1, p2);
 
   if (animeKoTimer > 0) {
     animeKoTimer -= dt;
@@ -257,9 +263,11 @@ function checkCombat(attacker, defender) {
     // Qurollar to'qnashuvi (Clash) tekshiruvi
     if (defender.isAttacking && (attacker.state === 'attack_heavy' || attacker.state === 'skill') && (defender.state === 'attack_heavy' || defender.state === 'skill')) {
       loop.setTimeScale(0.25, 1.2);
-      camera.triggerShake(14);
+      camera.triggerShake(16);
       audioEngine.playClash();
-      particleSystem.emit('spark', (attacker.x + defender.x) / 2, attacker.y - 40, 24, { color: '#FBBF24', speed: 250 });
+      particleSystem.emit('spark', (attacker.x + defender.x) / 2, attacker.y - 40, 28, { color: '#ffd166', speed: 280 });
+      hud.addToast('QUROLLAR TO\'QNASHUVI (WEAPON CLASH)!', 'gold');
+      hud.setCommsMessage('TACTICAL ALERT // QUROLLAR TO\'QNASHUVI YUZ BERDI');
       attacker.vx = -attacker.facing * 160;
       defender.vx = -defender.facing * 160;
       return;
@@ -269,10 +277,12 @@ function checkCombat(attacker, defender) {
 
     if (hitResult === 'parry') {
       loop.triggerHitstop(0.08);
-      camera.triggerShake(10);
+      camera.triggerShake(12);
       audioEngine.playParry();
-      particleSystem.emit('spark', defender.x + defender.facing * 20, defender.y - 40, 20, { color: '#FBBF24', speed: 260 });
-      particleSystem.addDamageText(defender.x, defender.y - 60, 'MUKAMMAL PARRY!', '#FBBF24', true);
+      particleSystem.emit('spark', defender.x + defender.facing * 20, defender.y - 40, 24, { color: '#ffd166', speed: 280 });
+      particleSystem.addDamageText(defender.x, defender.y - 60, 'MUKAMMAL PARRY!', '#ffd166', true);
+      hud.addToast('MUKAMMAL PARRY MUVAFFAQ QILINDI!', 'gold');
+      hud.setCommsMessage(`${defender.name}: MUKAMMAL PARRY MUVAFFAQ QILINDI`);
     } else if (hitResult === true) {
       attacker.hitsLanded++;
       attacker.totalDamageDealt += dmg;
@@ -280,14 +290,24 @@ function checkCombat(attacker, defender) {
       attacker.maxComboInMatch = Math.max(attacker.maxComboInMatch, attacker.currentComboCount);
 
       loop.triggerHitstop(attacker.state === 'attack_heavy' ? 0.07 : 0.04);
-      camera.triggerShake(attacker.state === 'attack_heavy' ? 12 : 6);
+      camera.triggerShake(attacker.state === 'attack_heavy' ? 14 : 7);
       audioEngine.playHit(attacker.state === 'attack_heavy');
 
-      particleSystem.emit('spark', defender.x, defender.y - 40, 12, {
+      // Zamin Decali (Zarba izi)
+      const decalType = attacker.heroConfig.element === 'fire' ? 'scorch' : attacker.heroConfig.element === 'frost' ? 'frost' : 'shadow';
+      arenaRenderer.addDecal(decalType, defender.x);
+
+      particleSystem.emit('spark', defender.x, defender.y - 40, 14, {
         color: attacker.heroConfig.palette.accent,
-        speed: 180,
+        speed: 200,
       });
-      particleSystem.addDamageText(defender.x, defender.y - 40, Math.round(dmg), '#FF4757', attacker.state === 'attack_heavy');
+      particleSystem.addDamageText(defender.x, defender.y - 40, Math.round(dmg), '#ff2e54', attacker.state === 'attack_heavy');
+
+      // Kombo Toast
+      if (attacker.currentComboCount === 3 || attacker.currentComboCount === 5 || attacker.currentComboCount === 8) {
+        hud.addToast(`[STREAK] ${attacker.currentComboCount}x COMBO RAMPAGE!`, 'violet');
+        hud.setCommsMessage(`${attacker.name}: ${attacker.currentComboCount}x KOMBO ZARBA BERILMOQDA`);
+      }
     }
   }
 }
@@ -310,8 +330,9 @@ function updateProjectiles(dt) {
         audioEngine.playParry();
       } else {
         audioEngine.playHit(false);
-        particleSystem.emit('spark', target.x, target.y - 35, 14, { color: '#38BDF8', speed: 180 });
-        particleSystem.addDamageText(target.x, target.y - 40, proj.damage, '#38BDF8');
+        arenaRenderer.addDecal(proj.element === 'frost' ? 'frost' : 'shadow', target.x);
+        particleSystem.emit('spark', target.x, target.y - 35, 14, { color: '#00e5ff', speed: 180 });
+        particleSystem.addDamageText(target.x, target.y - 40, proj.damage, '#00e5ff');
       }
       projectiles.splice(i, 1);
     }
@@ -359,4 +380,4 @@ const touchControls = new TouchControls(uiRoot);
 const loop = new GameLoop(onUpdate, onRender);
 loop.start();
 
-console.log(`${uz.appName} v3.2 — O'yin to'liq ishga tushirildi!`);
+console.log(`${uz.appName} v3.2 — Cyber-Tactical Arena to'liq ishga tushirildi!`);
