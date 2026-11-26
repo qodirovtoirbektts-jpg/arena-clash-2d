@@ -1,18 +1,32 @@
-// Arena Clash 2D v3.2 — Advanced 2.5D Parallax & Ground Decals Renderer
+// Arena Clash 2D v3.2 — Handcrafted Atmospheric Battleground Arena Renderer
 export class ArenaRenderer {
   constructor() {
-    this.currentArena = 'cyber_grid'; // 'cyber_grid' | 'fire_castle' | 'frost_temple'
+    this.currentArena = 'fire_castle';
     this.animTime = 0;
-    this.decals = []; // Zamin izlari (scorch marks, frost cracks, shadow runes)
-    this.cyberRain = [];
+    this.decals = []; // Zamin izlari
+    this.embers = []; // Ko'tariluvchi cho'g'lar
+    this.fogClouds = [];
 
-    // Ambient kibernetik yomg'ir / zarralar
-    for (let i = 0; i < 40; i++) {
-      this.cyberRain.push({
+    // Olov cho'g'lari
+    for (let i = 0; i < 35; i++) {
+      this.embers.push({
         x: Math.random() * 1280,
-        y: Math.random() * 720,
-        speed: 300 + Math.random() * 400,
-        length: 12 + Math.random() * 24,
+        y: 400 + Math.random() * 300,
+        vx: (Math.random() - 0.5) * 30,
+        vy: -40 - Math.random() * 60,
+        size: 1.5 + Math.random() * 3,
+        alpha: 0.3 + Math.random() * 0.7,
+      });
+    }
+
+    // Tuman qatlamlari
+    for (let i = 0; i < 5; i++) {
+      this.fogClouds.push({
+        x: i * 280,
+        y: 490,
+        width: 320,
+        height: 60,
+        vx: 15 + Math.random() * 10,
       });
     }
   }
@@ -21,16 +35,16 @@ export class ArenaRenderer {
     this.currentArena = arenaId;
   }
 
-  addDecal(type, x, y = 520, radius = 24) {
+  addDecal(type, x, y = 520, radius = 28) {
     this.decals.push({
       type, // 'scorch' | 'frost' | 'shadow'
       x,
       y,
       radius,
-      life: 10.0,
-      maxLife: 10.0,
+      life: 12.0,
+      maxLife: 12.0,
     });
-    if (this.decals.length > 50) {
+    if (this.decals.length > 40) {
       this.decals.shift();
     }
   }
@@ -38,7 +52,7 @@ export class ArenaRenderer {
   update(dt) {
     this.animTime += dt;
 
-    // Decallar sekin so'nadi
+    // Decallarni yangilash
     for (let i = this.decals.length - 1; i >= 0; i--) {
       this.decals[i].life -= dt;
       if (this.decals[i].life <= 0) {
@@ -46,138 +60,179 @@ export class ArenaRenderer {
       }
     }
 
-    // Cyber rain
-    for (const r of this.cyberRain) {
-      r.y += r.speed * dt;
-      if (r.y > 720) {
-        r.y = -30;
-        r.x = Math.random() * 1280;
+    // Embers
+    for (const em of this.embers) {
+      em.x += em.vx * dt;
+      em.y += em.vy * dt;
+      if (em.y < 150) {
+        em.y = 520;
+        em.x = Math.random() * 1280;
       }
+    }
+
+    // Fog
+    for (const f of this.fogClouds) {
+      f.x += f.vx * dt;
+      if (f.x > 1350) f.x = -350;
     }
   }
 
   render(ctx, camera, arenaObjects, mutator = 'none') {
-    const isCyber = this.currentArena === 'cyber_grid';
-    const isFire = this.currentArena === 'fire_castle';
-
-    // 1. Uzoq Parallax Qatlam (Osmon / Cyberspace Grid)
+    // 1. Chuqur Qadimiy Qal'a Osmoni (Handcrafted Atmospheric Gradient)
     ctx.save();
-    const skyGrad = ctx.createLinearGradient(0, 0, 0, 720);
-    if (isCyber) {
-      skyGrad.addColorStop(0, '#02040a');
-      skyGrad.addColorStop(0.5, '#050c1e');
-      skyGrad.addColorStop(1, '#091833');
-    } else if (isFire) {
-      skyGrad.addColorStop(0, '#0a0506');
-      skyGrad.addColorStop(0.5, '#200b0e');
-      skyGrad.addColorStop(1, '#3b1410');
-    } else {
-      skyGrad.addColorStop(0, '#040914');
-      skyGrad.addColorStop(0.5, '#0c1a30');
-      skyGrad.addColorStop(1, '#183154');
-    }
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, 520);
+    skyGrad.addColorStop(0, '#090507');
+    skyGrad.addColorStop(0.4, '#1c0b0f');
+    skyGrad.addColorStop(0.8, '#2d1313');
+    skyGrad.addColorStop(1, '#451c14');
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, 1280, 720);
 
-    // Kiber Vertikal Grid Chiziqlari (Parallax)
-    ctx.strokeStyle = isCyber ? 'rgba(0, 229, 255, 0.08)' : 'rgba(255, 255, 255, 0.04)';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < 1280; x += 64) {
-      const px = x - (camera.x * 0.1) % 64;
-      ctx.beginPath();
-      ctx.moveTo(px, 0);
-      ctx.lineTo(px, 520);
-      ctx.stroke();
+    // Qadimiy tosh qal'a devorlari va minoralar (Parallax layer 1)
+    ctx.fillStyle = 'rgba(24, 12, 14, 0.75)';
+    for (let i = 0; i < 6; i++) {
+      const colX = i * 240 - (camera.x * 0.12) % 240;
+      // Minoralar
+      ctx.fillRect(colX, 180, 70, 340);
+      // Minora tishlari (Crenellations)
+      for (let j = 0; j < 3; j++) {
+        ctx.fillRect(colX + j * 24, 164, 16, 16);
+      }
     }
     ctx.restore();
 
-    // 2. Ambient Cyber Rain / Sparks
+    // 2. Mash'alalar va Tirik Olovlar (Parallax layer 2)
     ctx.save();
-    ctx.strokeStyle = isCyber ? 'rgba(76, 201, 240, 0.25)' : 'rgba(255, 90, 31, 0.2)';
-    ctx.lineWidth = 1.5;
-    for (const r of this.cyberRain) {
+    const torchPositions = [160, 420, 680, 940, 1200];
+    for (const tx of torchPositions) {
+      const px = tx - (camera.x * 0.25) % 300;
+      const py = 330;
+
+      // Mash'ala nuri (Radial Bloom)
+      const flicker = Math.sin(this.animTime * 10 + tx) * 8;
+      const glowGrad = ctx.createRadialGradient(px, py, 4, px, py, 90 + flicker);
+      glowGrad.addColorStop(0, 'rgba(255, 140, 40, 0.55)');
+      glowGrad.addColorStop(0.4, 'rgba(255, 70, 10, 0.2)');
+      glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = glowGrad;
       ctx.beginPath();
-      ctx.moveTo(r.x, r.y);
-      ctx.lineTo(r.x, r.y + r.length);
-      ctx.stroke();
+      ctx.arc(px, py, 90 + flicker, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Qora temir mash'ala ushlagichi
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(px - 4, py + 8, 8, 30);
+      ctx.fillRect(px - 10, py + 6, 20, 6);
+
+      // Olov tillari
+      ctx.fillStyle = '#ffedd5';
+      ctx.beginPath();
+      ctx.arc(px, py, 6 + Math.sin(this.animTime * 12) * 2, 0, Math.PI * 2);
+      ctx.fill();
     }
     ctx.restore();
 
-    // 3. Asosiy Pol va Zamin Plitalari (520px)
+    // 3. Ko'tarilayotgan Olov Cho'g'lari (Embers)
+    ctx.save();
+    for (const em of this.embers) {
+      ctx.fillStyle = '#ff9040';
+      ctx.globalAlpha = em.alpha * (0.8 + Math.sin(this.animTime * 8 + em.x) * 0.2);
+      ctx.shadowColor = '#ff5a1f';
+      ctx.shadowBlur = 8;
+      ctx.fillRect(em.x, em.y, em.size, em.size);
+    }
+    ctx.restore();
+
+    // 4. Asosiy Zamin: Qadimiy Tosh Plitalar (Handcrafted Paved Battleground)
     ctx.save();
     const groundY = 520;
 
-    const groundGrad = ctx.createLinearGradient(0, groundY, 0, 720);
-    groundGrad.addColorStop(0, '#0b1324');
-    groundGrad.addColorStop(0.3, '#060a14');
-    groundGrad.addColorStop(1, '#02040a');
-    ctx.fillStyle = groundGrad;
+    // Asosiy tosh qatlam
+    const stoneGrad = ctx.createLinearGradient(0, groundY, 0, 720);
+    stoneGrad.addColorStop(0, '#292524');
+    stoneGrad.addColorStop(0.2, '#1c1917');
+    stoneGrad.addColorStop(1, '#0c0a09');
+    ctx.fillStyle = stoneGrad;
     ctx.fillRect(0, groundY, 1280, 200);
 
-    // Neon Yoritilgan Yuqori Chekka (Hazard Hairline)
-    ctx.fillStyle = isCyber ? '#00e5ff' : isFire ? '#ff5a1f' : '#38bdf8';
-    ctx.shadowColor = ctx.fillStyle;
-    ctx.shadowBlur = 14;
-    ctx.fillRect(0, groundY, 1280, 4);
-    ctx.shadowBlur = 0;
-
-    // Pol Plitalari va Rivet Nuqtalari
-    ctx.strokeStyle = 'rgba(76, 201, 240, 0.12)';
-    ctx.lineWidth = 1.5;
-    for (let x = 0; x < 1280; x += 80) {
+    // Qadimiy tosh plitalari va yoriqlari
+    ctx.strokeStyle = '#44403c';
+    ctx.lineWidth = 2;
+    for (let x = 0; x < 1280; x += 100) {
       ctx.beginPath();
-      ctx.moveTo(x, groundY + 4);
-      ctx.lineTo(x + 25, 720);
+      ctx.moveTo(x, groundY);
+      ctx.lineTo(x + 18, 720);
       ctx.stroke();
 
-      // Rivet dot
-      ctx.fillStyle = 'rgba(76, 201, 240, 0.3)';
-      ctx.fillRect(x + 4, groundY + 12, 3, 3);
+      // Gorizontal tosh bo'g'inlari
+      ctx.beginPath();
+      ctx.moveTo(x, groundY + 40);
+      ctx.lineTo(x + 100, groundY + 40);
+      ctx.stroke();
     }
+
+    // Zaminning yuqori yonuvchi jiyagi
+    ctx.fillStyle = '#ff5a1f';
+    ctx.shadowColor = '#ff5a1f';
+    ctx.shadowBlur = 16;
+    ctx.fillRect(0, groundY, 1280, 4);
     ctx.restore();
 
-    // 4. Zamin Decallari (Scorch marks, Frost, Shadow)
+    // 5. Zamin Decallari (Haqiqiy jang izlari — Scorch, Frost, Blood/Shadow)
     ctx.save();
     for (const d of this.decals) {
-      const alpha = Math.min(1, d.life / (d.maxLife * 0.4));
+      const alpha = Math.min(1, d.life / (d.maxLife * 0.35));
       ctx.globalAlpha = alpha;
 
       if (d.type === 'scorch') {
-        ctx.fillStyle = 'rgba(20, 10, 8, 0.85)';
-        ctx.strokeStyle = '#ff5a1f';
-        ctx.lineWidth = 1.5;
+        // Qoraygan yonish izi
+        ctx.fillStyle = '#0c0a09';
         ctx.beginPath();
-        ctx.ellipse(d.x, d.y + 2, d.radius, d.radius * 0.3, 0, 0, Math.PI * 2);
+        ctx.ellipse(d.x, d.y + 2, d.radius, d.radius * 0.35, 0, 0, Math.PI * 2);
         ctx.fill();
+
+        // Magma yoriqlari
+        ctx.strokeStyle = '#ea580c';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(d.x - 14, d.y + 2);
+        ctx.lineTo(d.x + 4, d.y + 5);
+        ctx.lineTo(d.x + 16, d.y - 1);
         ctx.stroke();
       } else if (d.type === 'frost') {
-        ctx.fillStyle = 'rgba(56, 189, 248, 0.25)';
-        ctx.strokeStyle = '#00e5ff';
+        // Qirov va muz kristallari
+        ctx.fillStyle = 'rgba(186, 230, 253, 0.45)';
+        ctx.strokeStyle = '#0284c7';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.ellipse(d.x, d.y + 2, d.radius, d.radius * 0.3, 0, 0, Math.PI * 2);
+        ctx.ellipse(d.x, d.y + 2, d.radius, d.radius * 0.35, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
       } else {
-        ctx.fillStyle = 'rgba(181, 123, 255, 0.25)';
+        // Soya izi
+        ctx.fillStyle = 'rgba(88, 28, 135, 0.45)';
         ctx.beginPath();
-        ctx.ellipse(d.x, d.y + 2, d.radius, d.radius * 0.3, 0, 0, Math.PI * 2);
+        ctx.ellipse(d.x, d.y + 2, d.radius, d.radius * 0.35, 0, 0, Math.PI * 2);
         ctx.fill();
       }
     }
     ctx.restore();
 
-    // 5. Arena Obyektlari (Platformalar va Lava)
+    // 6. Zaminda Suzuvchi Tuman (Atmospheric Ground Mist)
+    ctx.save();
+    for (const fog of this.fogClouds) {
+      const fogGrad = ctx.createLinearGradient(fog.x, fog.y, fog.x, fog.y + fog.height);
+      fogGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      fogGrad.addColorStop(0.6, 'rgba(255, 140, 50, 0.08)');
+      fogGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = fogGrad;
+      ctx.fillRect(fog.x, fog.y, fog.width, fog.height);
+    }
+    ctx.restore();
+
+    // 7. Arena Obyektlari (Platformalar va Lava)
     if (arenaObjects) {
       arenaObjects.render(ctx);
-    }
-
-    // 6. Mutator: Zulmat
-    if (mutator === 'darkness') {
-      ctx.save();
-      ctx.fillStyle = 'rgba(5, 8, 16, 0.94)';
-      ctx.fillRect(0, 0, 1280, 720);
-      ctx.restore();
     }
   }
 }
