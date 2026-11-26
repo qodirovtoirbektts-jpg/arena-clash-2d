@@ -1,9 +1,17 @@
 node_modules/
+server/node_modules/
+dist/
 .vercel/
 .env
+.env.local
+.env.*.local
 .DS_Store
 Thumbs.db
-data/replays/*.json
-*.log
+.vscode/
+.idea/
 
-.vercel
+# Katta xom sprite sheetlar, arxivlar va QA fayllar (Vercel buildni tez saqlash uchun)
+*.zip
+raw_sheets/
+public/assets/heroes/**/_qa_dark_preview.png
+public/assets/heroes/**/extras/

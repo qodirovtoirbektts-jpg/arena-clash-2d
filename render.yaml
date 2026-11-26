@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: arena-clash-2d-ws
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ALLOWED_ORIGINS
+        value: https://arena-clash-2d.vercel.app

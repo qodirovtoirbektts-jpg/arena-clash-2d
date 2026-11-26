@@ -1,0 +1,128 @@
+{
+  "version": "3.2.0",
+  "heroes": {
+    "blaze_knight": {
+      "id": "blaze_knight",
+      "name": "Olovli Ritsar",
+      "element": "fire",
+      "pivots": {
+        "pelvis": { "x": 0.50, "y": 0.50 },
+        "torso": { "x": 0.50, "y": 0.80 },
+        "head": { "x": 0.45, "y": 0.85 },
+        "arm_upper": { "x": 0.50, "y": 0.15 },
+        "arm_lower": { "x": 0.50, "y": 0.15 },
+        "leg_upper": { "x": 0.50, "y": 0.15 },
+        "leg_lower": { "x": 0.50, "y": 0.15 },
+        "weapon": { "x": 0.20, "y": 0.50 },
+        "cape": { "x": 0.50, "y": 0.10 }
+      },
+      "colors": {
+        "armorDark": "#262428",
+        "armorMid": "#3A3639",
+        "armorLight": "#4A4346",
+        "accent": "#FF5A1F",
+        "glow": "#FF6A00",
+        "cloth": "#8B1E1E",
+        "eyeGlow": "#FFAA00",
+        "weaponMetal": "#A6A2A8",
+        "weaponAura": "#FF4500"
+      },
+      "zOrder": [
+        "cape",
+        "leg_upper_back",
+        "leg_lower_back",
+        "arm_upper_back",
+        "arm_lower_back",
+        "torso",
+        "head",
+        "leg_upper_front",
+        "leg_lower_front",
+        "arm_upper_front",
+        "arm_lower_front",
+        "weapon"
+      ]
+    },
+    "shadow_ninja": {
+      "id": "shadow_ninja",
+      "name": "Soya Qotili",
+      "element": "shadow",
+      "pivots": {
+        "pelvis": { "x": 0.50, "y": 0.50 },
+        "torso": { "x": 0.50, "y": 0.80 },
+        "head": { "x": 0.45, "y": 0.85 },
+        "arm_upper": { "x": 0.50, "y": 0.15 },
+        "arm_lower": { "x": 0.50, "y": 0.15 },
+        "leg_upper": { "x": 0.50, "y": 0.15 },
+        "leg_lower": { "x": 0.50, "y": 0.15 },
+        "weapon": { "x": 0.25, "y": 0.50 },
+        "cape": { "x": 0.50, "y": 0.10 }
+      },
+      "colors": {
+        "armorDark": "#131418",
+        "armorMid": "#1A1B22",
+        "armorLight": "#353846",
+        "accent": "#9333EA",
+        "glow": "#A855F7",
+        "cloth": "#4A1D96",
+        "eyeGlow": "#C084FC",
+        "weaponMetal": "#7E22CE",
+        "weaponAura": "#A855F7"
+      },
+      "zOrder": [
+        "cape",
+        "leg_upper_back",
+        "leg_lower_back",
+        "arm_upper_back",
+        "arm_lower_back",
+        "torso",
+        "head",
+        "leg_upper_front",
+        "leg_lower_front",
+        "arm_upper_front",
+        "arm_lower_front",
+        "weapon"
+      ]
+    },
+    "frost_mage": {
+      "id": "frost_mage",
+      "name": "Muz Sehrgari",
+      "element": "frost",
+      "pivots": {
+        "pelvis": { "x": 0.50, "y": 0.50 },
+        "torso": { "x": 0.50, "y": 0.80 },
+        "head": { "x": 0.45, "y": 0.85 },
+        "arm_upper": { "x": 0.50, "y": 0.15 },
+        "arm_lower": { "x": 0.50, "y": 0.15 },
+        "leg_upper": { "x": 0.50, "y": 0.15 },
+        "leg_lower": { "x": 0.50, "y": 0.15 },
+        "weapon": { "x": 0.30, "y": 0.50 },
+        "cape": { "x": 0.50, "y": 0.10 }
+      },
+      "colors": {
+        "armorDark": "#0B1528",
+        "armorMid": "#0E1E3A",
+        "armorLight": "#1E3A5F",
+        "accent": "#38BDF8",
+        "glow": "#22D3EE",
+        "cloth": "#0369A1",
+        "eyeGlow": "#E0F2FE",
+        "weaponMetal": "#94A3B8",
+        "weaponAura": "#38BDF8"
+      },
+      "zOrder": [
+        "cape",
+        "leg_upper_back",
+        "leg_lower_back",
+        "arm_upper_back",
+        "arm_lower_back",
+        "torso",
+        "head",
+        "leg_upper_front",
+        "leg_lower_front",
+        "arm_upper_front",
+        "arm_lower_front",
+        "weapon"
+      ]
+    }
+  }
+}

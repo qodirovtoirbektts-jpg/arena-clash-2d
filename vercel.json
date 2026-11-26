@@ -1,26 +1,19 @@
 {
-  "version": 2,
-  "cleanUrls": true,
-  "routes": [
+  "headers": [
     {
-      "src": "/shared/(.*)",
-      "dest": "/shared/$1"
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
     },
     {
-      "src": "/css/(.*)",
-      "dest": "/client/css/$1"
-    },
-    {
-      "src": "/js/(.*)",
-      "dest": "/client/js/$1"
-    },
-    {
-      "src": "/",
-      "dest": "/client/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/client/$1"
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" }
+      ]
     }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
