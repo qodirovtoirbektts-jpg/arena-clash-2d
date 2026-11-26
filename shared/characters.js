@@ -32,7 +32,7 @@
           knockbackX: 250,
           knockbackY: -130,
           type: 'melee',
-          telegraphText: '⚔️ ZARBA!'
+          telegraphText: 'FIRE SLASH!'
         },
         heavy: {
           id: 'blaze_cleave',
@@ -49,7 +49,7 @@
           knockbackX: 460,
           knockbackY: -240,
           type: 'melee',
-          telegraphText: '💥 KUCHLI CLEAVE!'
+          telegraphText: 'FLAME CLEAVE!'
         },
         skill: {
           id: 'inferno_dash',
@@ -66,7 +66,7 @@
           knockbackX: 480,
           knockbackY: -190,
           type: 'dash_attack',
-          telegraphText: '🔥 INFERNO DASH!'
+          telegraphText: 'INFERNO DASH!'
         },
         dodge: {
           id: 'blaze_dodge',
@@ -76,7 +76,7 @@
           duration: 0.24,
           cooldown: 1.05,
           invulnerable: true,
-          telegraphText: '💨 DODGE!'
+          telegraphText: 'FLAME ROLL!'
         }
       }
     },
@@ -113,7 +113,7 @@
           knockbackX: 170,
           knockbackY: -80,
           type: 'melee',
-          telegraphText: '🗡️ XANJAR!'
+          telegraphText: 'TWIN DAGGERS!'
         },
         heavy: {
           id: 'ninja_kunai',
@@ -129,7 +129,7 @@
           projLifespan: 1.2,
           knockbackX: 280,
           knockbackY: -110,
-          telegraphText: '🎯 KUNAI!'
+          telegraphText: 'KUNAI TOSS!'
         },
         skill: {
           id: 'shadow_strike',
@@ -144,7 +144,7 @@
           knockbackX: 420,
           knockbackY: -210,
           type: 'teleport_attack',
-          telegraphText: '⚡ SHADOW STRIKE!'
+          telegraphText: 'SHADOW STRIKE!'
         },
         dodge: {
           id: 'ninja_dodge',
@@ -154,7 +154,7 @@
           duration: 0.26,
           cooldown: 0.90,
           invulnerable: true,
-          telegraphText: '💨 SMOKE PHASE!'
+          telegraphText: 'SMOKE PHASE!'
         }
       }
     },
@@ -193,7 +193,7 @@
           slowFactor: 0.75, // 25% sekinlashtiradi
           knockbackX: 210,
           knockbackY: -95,
-          telegraphText: '❄️ FROST BOLT!'
+          telegraphText: 'FROST BOLT!'
         },
         heavy: {
           id: 'ice_wave',
@@ -211,7 +211,7 @@
           projLifespan: 1.2,
           knockbackX: 240,
           knockbackY: -130,
-          telegraphText: '🌊 ICE SHARDS!'
+          telegraphText: 'ICE SHARDS!'
         },
         skill: {
           id: 'blizzard_nova',
@@ -227,7 +227,7 @@
           knockbackX: 340,
           knockbackY: -260,
           type: 'aoe_blast',
-          telegraphText: '🌀 BLIZZARD NOVA!'
+          telegraphText: 'BLIZZARD NOVA!'
         },
         dodge: {
           id: 'frost_dodge',
@@ -237,7 +237,7 @@
           duration: 0.22,
           cooldown: 1.15,
           invulnerable: true,
-          telegraphText: '💨 GLACIAL BLINK!'
+          telegraphText: 'GLACIAL BLINK!'
         }
       }
     }

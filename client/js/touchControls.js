@@ -38,7 +38,8 @@ class TouchControlsManager {
       overlay.style.display = this.enabled ? 'flex' : 'none';
     }
     if (touchBtn) {
-      touchBtn.textContent = this.enabled ? '📱 Sensor: Yoqiq' : '📱 Sensor: O\'chiq';
+      const iconHtml = window.GameIcons ? window.GameIcons.get('touch') : '';
+      touchBtn.innerHTML = `${iconHtml} <span>Sensor: ${this.enabled ? 'Yoqiq' : 'O\'chiq'}</span>`;
       touchBtn.style.color = this.enabled ? 'var(--primary)' : 'var(--text-muted)';
     }
   }

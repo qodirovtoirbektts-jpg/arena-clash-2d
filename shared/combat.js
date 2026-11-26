@@ -45,7 +45,7 @@
 
       // Joriy harakat holati (Action state - Nima bo'layotganini aniq ko'rsatish uchun)
       actionState: 'IDLE', // 'IDLE' | 'WINDUP' | 'ATTACK' | 'SKILL' | 'DODGE' | 'FROZEN' | 'STUN'
-      actionBadgeText: '', // '💥 CHARGING...', '🔥 INFERNO!', '❄️ FROZEN!'
+      actionBadgeText: '', // 'CHARGING...', 'INFERNO!', 'FROZEN!'
 
       // Combo tizimi
       comboHits: 0,
@@ -113,7 +113,7 @@
     if (player.freezeTimer > 0) {
       player.freezeTimer -= dt;
       player.actionState = 'FROZEN';
-      player.actionBadgeText = '❄️ MUZLAGAN!';
+      player.actionBadgeText = 'MUZLAGAN!';
       if (player.freezeTimer <= 0) {
         player.actionState = 'IDLE';
         player.actionBadgeText = '';
@@ -125,7 +125,7 @@
       player.stunTimer -= dt;
       if (player.freezeTimer <= 0) {
         player.actionState = 'STUN';
-        player.actionBadgeText = '💫 GANDIRASLASH!';
+        player.actionBadgeText = 'GANDIRASLASH!';
       }
       if (player.stunTimer <= 0 && player.freezeTimer <= 0) {
         player.actionState = 'IDLE';
@@ -137,7 +137,7 @@
     if (player.isDead) {
       player.respawnTimer -= dt;
       player.actionState = 'DEAD';
-      player.actionBadgeText = '☠️ MAG\'LUB';
+      player.actionBadgeText = "MAG'LUB";
       if (player.respawnTimer <= 0) {
         exports.respawnPlayer(player);
       }
@@ -165,7 +165,7 @@
     player.slowTimer = 0;
     player.freezeTimer = 0;
     player.actionState = 'IDLE';
-    player.actionBadgeText = '✨ TIKLANISH!';
+    player.actionBadgeText = 'TIKLANISH!';
     player.invulnerable = true;
     setTimeout(() => {
       if (player) {
@@ -191,7 +191,7 @@
       player.currentAttack = null;
       player.isAttacking = false;
       player.actionState = 'DODGE';
-      player.actionBadgeText = dodgeDef.telegraphText || '💨 DODGE!';
+      player.actionBadgeText = dodgeDef.telegraphText || 'DODGE!';
 
       let dirX = input.moveX || player.facing;
       if (dirX === 0) dirX = player.facing;
@@ -215,7 +215,7 @@
       player.cooldowns.skill = skillDef.cooldown;
       player.stats.totalAttacks++;
       player.actionState = 'SKILL';
-      player.actionBadgeText = skillDef.telegraphText || '⚡ SKILL!';
+      player.actionBadgeText = skillDef.telegraphText || 'SKILL!';
 
       if (skillDef.type === 'dash_attack') {
         player.isDashing = true;
@@ -289,7 +289,7 @@
       player.cooldowns.heavy = heavyDef.cooldown;
       player.stats.totalAttacks++;
       player.actionState = 'WINDUP';
-      player.actionBadgeText = heavyDef.telegraphText || '💥 KUCHLI ZARBA!';
+      player.actionBadgeText = heavyDef.telegraphText || 'KUCHLI ZARBA!';
 
       if (heavyDef.type === 'projectile') {
         projectiles.push({
@@ -352,7 +352,7 @@
       player.cooldowns.light = lightDef.cooldown;
       player.stats.totalAttacks++;
       player.actionState = 'ATTACK';
-      player.actionBadgeText = lightDef.telegraphText || '⚔️ ZARBA!';
+      player.actionBadgeText = lightDef.telegraphText || 'ZARBA!';
 
       if (lightDef.type === 'projectile') {
         projectiles.push({
@@ -515,7 +515,7 @@
     if (attackDef && attackDef.freezeDuration) {
       target.freezeTimer = attackDef.freezeDuration;
       target.actionState = 'FROZEN';
-      target.actionBadgeText = '❄️ MUZLAGAN!';
+      target.actionBadgeText = 'MUZLAGAN!';
       events.push({
         type: EVENT_TYPE.FREEZE,
         targetId: target.id,
@@ -574,7 +574,7 @@
       target.isDead = true;
       target.respawnTimer = 2.0;
       target.actionState = 'DEAD';
-      target.actionBadgeText = '☠️ MAG\'LUB';
+      target.actionBadgeText = "MAG'LUB";
       if (attacker.stats) attacker.stats.kills++;
       if (target.stats) target.stats.deaths++;
       if (attacker.score !== undefined) attacker.score++;

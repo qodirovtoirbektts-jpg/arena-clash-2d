@@ -33,7 +33,10 @@ class NetworkManager {
     } catch (err) {
       console.warn('[Network] WebSocket ochilmadi:', err);
       const pingEl = document.getElementById('ping-display');
-      if (pingEl) pingEl.textContent = '📴 Offline / Bot';
+      if (pingEl) {
+        const iconHtml = window.GameIcons ? window.GameIcons.get('signal') : '';
+        pingEl.innerHTML = `${iconHtml} <span>Offline / Bot</span>`;
+      }
       return;
     }
 
@@ -41,7 +44,10 @@ class NetworkManager {
       this.connected = true;
       console.log('[Network] Serverga ulandi:', wsUrl);
       const pingEl = document.getElementById('ping-display');
-      if (pingEl) pingEl.textContent = '📶 0 ms';
+      if (pingEl) {
+        const iconHtml = window.GameIcons ? window.GameIcons.get('signal') : '';
+        pingEl.innerHTML = `${iconHtml} <span>0 ms</span>`;
+      }
       this.startPing();
 
       // Agar oldingi seans bo'lsa, avtomatik qayta ulanishga urinish
@@ -69,7 +75,10 @@ class NetworkManager {
       this.connected = false;
       this.stopPing();
       const pingEl = document.getElementById('ping-display');
-      if (pingEl) pingEl.textContent = '📴 Offline / Lokal';
+      if (pingEl) {
+        const iconHtml = window.GameIcons ? window.GameIcons.get('signal') : '';
+        pingEl.innerHTML = `${iconHtml} <span>Offline / Lokal</span>`;
+      }
       // Faqat serverda ishlayotgan bo'lsa qayta ulanishga urinish
       if (!location.hostname.includes('vercel.app')) {
         setTimeout(() => this.connect(wsUrl), 3000);
@@ -78,7 +87,10 @@ class NetworkManager {
 
     this.ws.onerror = (err) => {
       const pingEl = document.getElementById('ping-display');
-      if (pingEl) pingEl.textContent = '📴 Offline / Lokal';
+      if (pingEl) {
+        const iconHtml = window.GameIcons ? window.GameIcons.get('signal') : '';
+        pingEl.innerHTML = `${iconHtml} <span>Offline / Lokal</span>`;
+      }
     };
   }
 

@@ -112,7 +112,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // 8. Server Error
   net.on(MSG.S_ERROR, (msg) => {
-    alert(msg.message || 'Xatolik yuz berdi');
+    if (window.uiManager && window.uiManager.showToast) {
+      window.uiManager.showToast(msg.message || 'Xatolik yuz berdi', 'danger');
+    } else {
+      console.error('[Server Error]', msg.message);
+    }
   });
 
   function handleServerEvent(ev, selfId) {
@@ -148,7 +152,7 @@ window.addEventListener('DOMContentLoaded', () => {
       window.renderer.triggerScreenShake(16);
       window.renderer.triggerHitStop(0.08);
       window.renderer.spawnParticles(ev.x, ev.y, 35, '#ff4757', 280);
-      window.renderer.addDamageText(ev.x, ev.y - 30, 'KNOCKOUT! 💥', '#e74c3c', true);
+      window.renderer.addDamageText(ev.x, ev.y - 30, 'KNOCKOUT!', '#e74c3c', true);
     } else if (ev.type === EVENT_TYPE.ROUND_START) {
       window.uiManager.showAnnouncement(`ROUND ${ev.round} — JANG!`);
       window.audioManager.playCountdown(true);
@@ -171,7 +175,11 @@ window.addEventListener('DOMContentLoaded', () => {
       currentFps = fpsCounter;
       fpsCounter = 0;
       fpsTimer = 0;
-      document.getElementById('ping-display').textContent = `📶 ${net.ping} ms`;
+      const pingEl = document.getElementById('ping-display');
+      if (pingEl) {
+        const iconHtml = window.GameIcons ? window.GameIcons.get('signal') : '';
+        pingEl.innerHTML = `${iconHtml} <span>${net.ping} ms</span>`;
+      }
     }
 
     // Effektlarni yangilash

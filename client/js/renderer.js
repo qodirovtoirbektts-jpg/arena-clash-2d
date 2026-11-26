@@ -57,10 +57,10 @@ class Renderer {
     let title = `${count}x COMBO!`;
     let color = '#ffa502';
     if (count >= 5) {
-      title = `${count}x ULTRA COMBO! 🔥`;
+      title = `${count}x ULTRA COMBO!`;
       color = '#ff4757';
     } else if (count >= 3) {
-      title = `${count}x GREAT COMBO! ⚡`;
+      title = `${count}x GREAT COMBO!`;
       color = '#e056fd';
     }
 

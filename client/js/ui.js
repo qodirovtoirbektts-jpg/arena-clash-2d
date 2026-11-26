@@ -26,7 +26,15 @@ class UIManager {
     this.userProfile = user;
 
     document.getElementById('user-display-name').textContent = user.username;
-    document.getElementById('user-mmr-badge').textContent = `🏆 ${user.mmr} MMR`;
+    const mmrVal = document.getElementById('user-mmr-value');
+    if (mmrVal) {
+      mmrVal.textContent = `${user.mmr} MMR`;
+    } else {
+      const mmrBadge = document.getElementById('user-mmr-badge');
+      if (mmrBadge) {
+        mmrBadge.innerHTML = `${window.GameIcons ? window.GameIcons.get('trophy') : ''} <span>${user.mmr} MMR</span>`;
+      }
+    }
     document.getElementById('username-input').value = user.username;
 
     const stats = user.stats || { wins: 0, losses: 0, matchesPlayed: 0 };
@@ -93,10 +101,13 @@ class UIManager {
         const charDef = window.GameCharacters.CHARACTERS[p.characterId] || window.GameCharacters.CHARACTERS.blaze_knight;
         const isSelf = p.id === window.networkManager.playerId;
 
+        const iconName = charDef.id === 'blaze_knight' ? 'fire' : (charDef.id === 'shadow_ninja' ? 'kunai' : 'snowflake');
+        const iconHtml = window.GameIcons ? window.GameIcons.get(iconName) : '•';
+
         slotDiv.innerHTML = `
           <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 24px; width: 44px; height: 44px; background: rgba(255,255,255,0.06); border: 1px solid ${charDef.color}; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-              ${charDef.id === 'blaze_knight' ? '🗡️' : (charDef.id === 'shadow_ninja' ? '🥷' : '❄️')}
+            <div style="font-size: 22px; width: 44px; height: 44px; background: rgba(255,255,255,0.06); border: 1px solid ${charDef.color}; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: ${charDef.color};">
+              ${iconHtml}
             </div>
             <div>
               <div style="font-weight: 700; color: #fff; font-size: 15px;">${p.username} ${isSelf ? '(Siz)' : ''}</div>
@@ -105,7 +116,7 @@ class UIManager {
           </div>
           <div>
             <span class="ready-pill ${p.ready ? 'ready' : 'waiting'}">
-              ${p.ready ? '✓ Tayyor' : 'Kutilmoqda'}
+              ${p.ready ? (window.GameIcons ? window.GameIcons.get('check') : '') + ' Tayyor' : 'Kutilmoqda'}
             </span>
           </div>
         `;
@@ -266,7 +277,9 @@ class UIManager {
     // Ovoz yoqish/o'chirish
     document.getElementById('btn-toggle-sound').addEventListener('click', () => {
       window.audioManager.enabled = !window.audioManager.enabled;
-      document.getElementById('btn-toggle-sound').textContent = window.audioManager.enabled ? '🔊 Ovoz' : '🔇 Ovoz o\'chiq';
+      const icon = window.audioManager.enabled ? 'soundOn' : 'soundOff';
+      const iconHtml = window.GameIcons ? window.GameIcons.get(icon) : '';
+      document.getElementById('btn-toggle-sound').innerHTML = `${iconHtml} <span>${window.audioManager.enabled ? 'Ovoz' : 'O\'chiq'}</span>`;
     });
 
     // Qahramon tanlash ekraniga o'tish
@@ -328,7 +341,9 @@ class UIManager {
     document.getElementById('lobby-room-code').addEventListener('click', () => {
       const code = document.getElementById('lobby-room-code').textContent;
       navigator.clipboard.writeText(code).then(() => {
-        alert(`Xona kodi (${code}) buferga nusxalandi! Do'stingizga yuboring.`);
+        this.showToast(`Xona kodi (${code}) buferga nusxalandi! Do'stingizga yuboring.`, 'success');
+      }).catch(() => {
+        this.showToast(`Xona kodi: ${code}`, 'info');
       });
     });
 
@@ -404,11 +419,14 @@ class UIManager {
               div.style.cssText = 'background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;';
               div.innerHTML = `
                 <div>
-                  <div style="font-weight: 700;">Match ID: ${r.id}</div>
+                  <div style="font-weight: 700; color: #fff;">Match #${r.id}</div>
                   <div style="font-size: 12px; color: var(--text-muted);">${r.duration} sek davomiyligi &bull; ${r.totalTicks} ta tick</div>
                 </div>
-                <button class="btn btn-primary" style="width: auto; margin-bottom: 0; padding: 6px 14px; font-size: 13px;" onclick="alert('Replay yuklanmoqda... (Replay ID: ${r.id})')">Ko'rish</button>
+                <button class="btn btn-primary btn-inspect-replay" style="width: auto; margin-bottom: 0; padding: 6px 14px; font-size: 13px;" data-id="${r.id}" data-ticks="${r.totalTicks}" data-duration="${r.duration}">Telemetriya</button>
               `;
+              div.querySelector('.btn-inspect-replay').addEventListener('click', () => {
+                this.showToast(`Match #${r.id} telemetriyasi: ${r.totalTicks} ta server ticklari muvaffaqiyatli saqlangan.`, 'info', 4000);
+              });
               cont.appendChild(div);
             });
           }
@@ -431,6 +449,42 @@ class UIManager {
         window.renderer.showDebug = !window.renderer.showDebug;
       }
     });
+  }
+
+  // Zamonaviy In-Game Toast Xabarnoma Tizimi (Brauzer alert o'rniga)
+  showToast(message, type = 'info', duration = 3200) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast-item toast-${type}`;
+
+    let iconName = 'lightning';
+    if (type === 'success') iconName = 'check';
+    else if (type === 'warning') iconName = 'shield';
+    else if (type === 'danger') iconName = 'close';
+
+    const iconHtml = window.GameIcons ? window.GameIcons.get(iconName) : '•';
+    const closeHtml = window.GameIcons ? window.GameIcons.get('close') : '×';
+
+    toast.innerHTML = `
+      <div class="toast-icon">${iconHtml}</div>
+      <div class="toast-content">${message}</div>
+      <button class="toast-close" title="Yopish">${closeHtml}</button>
+    `;
+
+    const closeBtn = toast.querySelector('.toast-close');
+    const dismiss = () => {
+      if (toast.classList.contains('toast-leave')) return;
+      toast.classList.add('toast-leave');
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 260);
+    };
+
+    closeBtn.addEventListener('click', dismiss);
+    setTimeout(dismiss, duration);
+    container.appendChild(toast);
   }
 }
 

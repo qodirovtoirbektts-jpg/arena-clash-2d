@@ -28,9 +28,12 @@ class LocalGameEngine {
     this.events = [];
     this.winner = null;
 
+    const botGladiators = ['Vanguard-Prime', 'Kage-Zero', 'Ignis-Rex', 'Cryo-Specter', 'Dusk-Ronin'];
+    const botName = botGladiators[Math.floor(Math.random() * botGladiators.length)];
+
     this.players = {
       p1: window.GameCombat.createPlayerState('p1', 'Player 1 (Siz)', p1Char, 0),
-      p2: window.GameCombat.createPlayerState('p2', mode === 'vs_bot' ? 'AI Bot (Ekspert)' : 'Player 2', p2Char, 1)
+      p2: window.GameCombat.createPlayerState('p2', mode === 'vs_bot' ? botName : 'Player 2', p2Char, 1)
     };
   }
 
@@ -207,7 +210,7 @@ class LocalGameEngine {
       window.renderer.triggerScreenShake(16);
       window.renderer.triggerHitStop(0.08); // Dramatik to'xtash
       window.renderer.spawnParticles(ev.x, ev.y, 35, '#ff4757', 280);
-      window.renderer.addDamageText(ev.x, ev.y - 30, 'KNOCKOUT! 💥', '#e74c3c', true);
+      window.renderer.addDamageText(ev.x, ev.y - 30, 'KNOCKOUT!', '#e74c3c', true);
     }
   }
 
