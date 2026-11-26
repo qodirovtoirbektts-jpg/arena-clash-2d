@@ -315,8 +315,8 @@ export class MenuManager {
     this.mvpElement.className = 'mvp-overlay';
     this.mvpElement.innerHTML = `
       <div class="mvp-card">
-        <h1 class="${isP1Win ? 'win' : 'lose'}">${isP1Win ? 'G\'ALABA QOZONDINGIZ!' : 'MAG\'LUBIYAT!'}</h1>
-        <h2 style="font-family: var(--font-display); margin-top: 8px; color: #ffffff;">${winner.name.toUpperCase()} JANG G'OLIBI!</h2>
+        <h1 class="${isP1Win ? 'win' : 'lose'}">${isP1Win ? "SIZ G'ALABA QOZONDINGIZ!" : "MAG'LUBIYAT!"}</h1>
+        <h2 style="font-family: var(--font-display); margin-top: 8px; color: #ffffff;">${isP1Win ? "SIZ G'ALABA QOZONDINGIZ!" : `${winner.name.toUpperCase()} JANG G'OLIBI!`}</h2>
 
         <div class="stats-grid">
           <div class="stat-item">

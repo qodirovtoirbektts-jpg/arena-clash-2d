@@ -56,14 +56,18 @@ export class Fighter {
     // Awakening / Rage (HP < 20%)
     this.isAwakened = false;
 
-    // O'lchamlar
-    this.width = this.heroConfig.rig.hurtbox.width;
-    this.height = this.heroConfig.rig.hurtbox.height;
+    // O'lchamlar (Realistic human athletic proportions ~105px)
+    this.width = 44;
+    this.height = 104;
+
+    // Shadow Fight uslubidagi sharpalar (Afterimages / Ghost trails)
+    this.afterimages = [];
+    this.afterimageTimer = 0;
 
     // Plash / sharf Verlet fizikasi uchun nuqtalar
     this.capePoints = [];
-    for (let i = 0; i < 5; i++) {
-      this.capePoints.push({ x: this.x, y: this.y - 40 + i * 10, oldX: this.x, oldY: this.y - 40 + i * 10 });
+    for (let i = 0; i < 6; i++) {
+      this.capePoints.push({ x: this.x, y: this.y - 50 + i * 11, oldX: this.x, oldY: this.y - 50 + i * 11 });
     }
   }
 
@@ -158,6 +162,31 @@ export class Fighter {
     if (this.damageBuffTimer > 0) this.damageBuffTimer -= dt;
     if (this.slowTimer > 0) this.slowTimer -= dt;
     if (this.hitFlashTimer > 0) this.hitFlashTimer -= dt;
+
+    // Sharpalar (Afterimages) yangilanishi
+    for (let i = this.afterimages.length - 1; i >= 0; i--) {
+      this.afterimages[i].alpha -= dt * 3.5;
+      if (this.afterimages[i].alpha <= 0) {
+        this.afterimages.splice(i, 1);
+      }
+    }
+
+    if (this.state === 'dodge' || this.state === 'skill' || (this.isAwakened && Math.abs(this.vx) > 150)) {
+      this.afterimageTimer += dt;
+      if (this.afterimageTimer > 0.04) {
+        this.afterimageTimer = 0;
+        this.afterimages.push({
+          x: this.x,
+          y: this.y,
+          facing: this.facing,
+          alpha: 0.55,
+          state: this.state,
+          heroId: this.heroId,
+          glow: this.heroConfig.palette.glow,
+        });
+        if (this.afterimages.length > 5) this.afterimages.shift();
+      }
+    }
     if (this.comboWindowTimer > 0) {
       this.comboWindowTimer -= dt;
       if (this.comboWindowTimer <= 0) {

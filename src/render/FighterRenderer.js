@@ -1,4 +1,4 @@
-// Arena Clash 2D v3.2 — Professional Qo'lda Chizilgan Qahramon Rendereri (Handcrafted Studio Art)
+// Arena Clash 2D v3.2 — Shadow Fight & Ninja Usulidagi Real Inson Anatomiyasi Rendereri
 export class FighterRenderer {
   constructor() {
     this.animTime = 0;
@@ -8,48 +8,62 @@ export class FighterRenderer {
     if (!fighter) return;
     this.animTime += 0.016;
 
-    ctx.save();
-    const { x, y, facing, heroConfig, isAwakened, hitFlashTimer, state, stateTimer } = fighter;
+    const { x, y, facing, heroConfig, isAwakened, hitFlashTimer, state, afterimages } = fighter;
 
-    // 1. Zamin Soyasi (Balandlikka mos dinamik ellips)
+    // 1. Shadow Fight Sharpalari (Afterimages / Ghost Clones)
+    if (afterimages && afterimages.length > 0) {
+      for (const ghost of afterimages) {
+        ctx.save();
+        ctx.translate(ghost.x, ghost.y);
+        ctx.scale(ghost.facing, 1);
+        ctx.globalAlpha = ghost.alpha;
+        ctx.fillStyle = '#07090f';
+        ctx.shadowColor = ghost.glow || '#a855f7';
+        ctx.shadowBlur = 16;
+        this.drawFighterBody(ctx, ghost.heroId, ghost.state, false, true);
+        ctx.restore();
+      }
+    }
+
+    ctx.save();
+
+    // 2. Dinamik Zamin Soyasi (Balandlikka mos elastik ellips)
     const distFromGround = Math.max(0, 520 - y);
     const shadowScale = Math.max(0.25, 1.0 - distFromGround / 320);
-    const shadowAlpha = Math.max(0.1, 0.55 - distFromGround / 400);
+    const shadowAlpha = Math.max(0.12, 0.58 - distFromGround / 380);
 
     ctx.save();
     ctx.translate(x, 520);
-    ctx.scale(shadowScale, shadowScale * 0.3);
+    ctx.scale(shadowScale, shadowScale * 0.28);
     ctx.fillStyle = `rgba(3, 5, 10, ${shadowAlpha})`;
     ctx.beginPath();
-    ctx.arc(0, 0, 38, 0, Math.PI * 2);
+    ctx.arc(0, 0, 44, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
-    // 2. Anime KO Finisher Rejimi (Qora-qizil manga kontrasti)
+    // 3. Anime KO Finisher Rejimi (Qora-qizil manga kontrasti)
     if (isAnimeKo) {
       ctx.translate(x, y);
       ctx.scale(facing, 1);
       ctx.fillStyle = fighter.isDead ? '#050508' : '#e11d48';
       ctx.shadowColor = '#ff0033';
       ctx.shadowBlur = 28;
-      this.drawFullSilhouette(ctx, heroConfig.id);
+      this.drawFighterBody(ctx, heroConfig.id, state, false, true);
       ctx.restore();
       return;
     }
 
-    // 3. Squash & Stretch (Harakat va sakrashdagi elastiklik)
+    // 4. Squash & Stretch va Nafas Harakati
     let sx = 1.0;
     let sy = 1.0;
     if (!fighter.isGrounded) {
       if (fighter.vy < -100) {
-        sx = 0.92;
-        sy = 1.08; // Cho'zilish
+        sx = 0.93; sy = 1.07;
       } else if (fighter.vy > 100) {
-        sx = 1.05;
-        sy = 0.95; // Qisiluvchan tushish
+        sx = 1.06; sy = 0.94;
       }
     } else if (state === 'idle') {
-      const breath = Math.sin(this.animTime * 3) * 0.02;
+      const breath = Math.sin(this.animTime * 3.5) * 0.025;
       sy = 1.0 + breath;
       sx = 1.0 - breath * 0.5;
     } else if (state === 'run') {
@@ -57,15 +71,14 @@ export class FighterRenderer {
       sy = 1.0 - runBob;
     }
 
-    // 4. Qahramon Koordinatalari
     ctx.translate(x, y);
     ctx.scale(facing * sx, sy);
 
     const isHitFlash = hitFlashTimer > 0;
 
-    // Elementar Rim Lighting va Aura
+    // Elementar Rim Lighting (Shadow Fight uslubida mushaklar chetidagi neon nur)
     ctx.shadowColor = isHitFlash ? '#ffffff' : heroConfig.palette.glow;
-    ctx.shadowBlur = isAwakened ? 26 : 12;
+    ctx.shadowBlur = isAwakened ? 28 : 14;
 
     // Awakening / Rage Qat'iy Olovli Aulasi
     if (isAwakened) {
@@ -74,30 +87,24 @@ export class FighterRenderer {
       ctx.strokeStyle = heroConfig.palette.glow;
       ctx.lineWidth = 3.5;
       ctx.beginPath();
-      ctx.ellipse(0, -42, 34 + auraP, 52 + auraP, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, -52, 36 + auraP, 60 + auraP, 0, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Ko'z nur izlari
+      // Ko'z nurining shamolda cho'zilishi
       ctx.fillStyle = '#ffffff';
       ctx.shadowColor = heroConfig.palette.glow;
       ctx.shadowBlur = 18;
       ctx.beginPath();
-      ctx.arc(8, -72, 3.5, 0, Math.PI * 2);
+      ctx.arc(10, -88, 3.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
 
-    // 5. Verlet Plash / Sharf (Orqa qatlam)
-    this.drawHandcraftedCape(ctx, fighter, isHitFlash);
+    // 5. Shamolda Hilpirayotgan Mato (Verlet Scarf / Cape)
+    this.drawShadowCloth(ctx, fighter, isHitFlash);
 
-    // 6. Qahramon Tanasi va Bo'g'imlari (Anime/Indie Fighter silueti)
-    if (heroConfig.id === 'blaze_knight') {
-      this.drawBlazeKnight(ctx, fighter, isHitFlash);
-    } else if (heroConfig.id === 'shadow_ninja') {
-      this.drawShadowNinja(ctx, fighter, isHitFlash);
-    } else {
-      this.drawFrostMage(ctx, fighter, isHitFlash);
-    }
+    // 6. Inson Anatomiyasidagi Jangchi (Shadow Fight uslubidagi 7.5 bosh nisbati)
+    this.drawFighterBody(ctx, heroConfig.id, state, isHitFlash, false);
 
     // 7. Qilich Harakati va Hujum Yoyi Smearlari (Attack Slash Arcs)
     this.drawAttackSmear(ctx, fighter);
@@ -105,296 +112,287 @@ export class FighterRenderer {
     ctx.restore();
   }
 
-  // 1. Olovli Ritsar (Blaze Knight — Og'ir Temir Zirh, Yirtilgan Qizil Plash, Katta Qilich)
-  drawBlazeKnight(ctx, fighter, isHitFlash) {
-    const pal = fighter.heroConfig.palette;
-    const { state } = fighter;
+  // Shadow Fight uslubidagi Inson Anatomiyasi (Proportional 7.5-head athletic build)
+  drawFighterBody(ctx, heroId, state, isHitFlash, isGhost = false) {
+    const isAttacking = ['attack_light', 'attack_heavy', 'skill'].includes(state);
+    const isHeavy = state === 'attack_heavy';
+    const isBlocking = state === 'block';
 
-    // Orqa oyoq va boldir
-    ctx.save();
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.armorDark;
-    ctx.strokeStyle = isHitFlash ? '#fff' : pal.armorMid;
-    ctx.lineWidth = 2;
-    // Oyoq silueti
-    ctx.beginPath();
-    ctx.roundRect(4, -28, 14, 28, 4);
-    ctx.fill();
-    ctx.stroke();
-    // Sabaton (temir botinka)
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.armorMid;
-    ctx.beginPath();
-    ctx.moveTo(4, 0);
-    ctx.lineTo(24, 0);
-    ctx.lineTo(18, -10);
-    ctx.lineTo(4, -10);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
+    // Retslar va ranglar
+    let baseColor = isGhost ? '#07090f' : isHitFlash ? '#ffffff' : '#0c1018';
+    let armorColor = isGhost ? '#07090f' : isHitFlash ? '#ffffff' : '#182030';
+    let accentColor = heroId === 'blaze_knight' ? '#ff5a1f' : heroId === 'shadow_ninja' ? '#a855f7' : '#00e5ff';
 
-    // Orqa yelka va qo'l
+    // 1. ORQA OYOQ (Muscular Rear Leg: Thigh + Knee + Calf + Tabi)
     ctx.save();
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.armorDark;
-    ctx.beginPath();
-    ctx.roundRect(8, -54, 12, 22, 4);
-    ctx.fill();
-    ctx.restore();
+    ctx.fillStyle = baseColor;
+    ctx.strokeStyle = isGhost ? accentColor : 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 1.5;
 
-    // Tana va Ko'krak Qafasi Zirhi (Cuirass with Magma Veins)
-    ctx.save();
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.armorDark;
-    ctx.strokeStyle = isHitFlash ? '#fff' : pal.armorLight;
-    ctx.lineWidth = 2;
+    // Orqa son (Thigh)
     ctx.beginPath();
-    ctx.moveTo(-16, -60);
-    ctx.lineTo(16, -60);
-    ctx.lineTo(12, -26);
-    ctx.lineTo(-12, -26);
+    ctx.moveTo(4, -46);
+    ctx.lineTo(16, -24);
+    ctx.lineTo(8, -22);
+    ctx.lineTo(2, -44);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
-    // Zirhning ichki o'yma chiziqlari va magma yoriqlari
-    if (!isHitFlash) {
-      ctx.strokeStyle = pal.accent;
-      ctx.lineWidth = 2.5;
-      ctx.shadowColor = pal.glow;
-      ctx.shadowBlur = 8;
-      ctx.beginPath();
-      ctx.moveTo(-6, -50);
-      ctx.lineTo(0, -42);
-      ctx.lineTo(8, -48);
-      ctx.stroke();
-    }
-    // Temir kamar
-    ctx.fillStyle = '#1c1917';
-    ctx.fillRect(-14, -28, 28, 6);
-    ctx.fillStyle = pal.accent;
-    ctx.fillRect(-4, -28, 8, 6);
-    ctx.restore();
-
-    // Oldingi Oyoq va Greave
-    ctx.save();
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.armorMid;
-    ctx.strokeStyle = isHitFlash ? '#fff' : pal.armorLight;
-    ctx.lineWidth = 2;
+    // Orqa boldir va Tabi (Calf & Foot)
     ctx.beginPath();
-    ctx.roundRect(-16, -30, 14, 30, 4);
-    ctx.fill();
-    ctx.stroke();
-    // Tizza qalqoni (poleyn)
-    ctx.fillStyle = pal.armorLight;
-    ctx.fillRect(-17, -22, 16, 8);
-    // Oldingi sabaton
-    ctx.beginPath();
-    ctx.moveTo(-16, 0);
-    ctx.lineTo(6, 0);
-    ctx.lineTo(0, -10);
-    ctx.lineTo(-16, -10);
+    ctx.moveTo(12, -22);
+    ctx.lineTo(18, 0);
+    ctx.lineTo(28, 0);
+    ctx.lineTo(22, -10);
+    ctx.lineTo(8, -20);
     ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-
-    // Dubulg'a (Great Helm with Glowing Visor Slit)
-    ctx.save();
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.armorDark;
-    ctx.strokeStyle = isHitFlash ? '#fff' : pal.armorLight;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(-10, -78, 22, 20, 6);
-    ctx.fill();
-    ctx.stroke();
-
-    // Dubulg'a tepasidagi olovli toj / qirra
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.accent;
-    ctx.beginPath();
-    ctx.moveTo(-4, -78);
-    ctx.lineTo(0, -88);
-    ctx.lineTo(6, -78);
-    ctx.closePath();
-    ctx.fill();
-
-    // Visor yorig'i (Ko'z nuri)
-    if (!isHitFlash) {
-      ctx.fillStyle = pal.eyeGlow;
-      ctx.shadowColor = pal.eyeGlow;
-      ctx.shadowBlur = 12;
-      ctx.fillRect(2, -71, 9, 3);
-    }
-    ctx.restore();
-
-    // Oldingi Yelka Zirhi (Layered Pauldron)
-    ctx.save();
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.armorMid;
-    ctx.strokeStyle = isHitFlash ? '#fff' : pal.armorLight;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(-18, -62, 16, 16, 4);
     ctx.fill();
     ctx.stroke();
     ctx.restore();
 
-    // Qurol: Katta Olovli Qilich (Two-Handed Claymore)
-    this.drawKnightSword(ctx, fighter, isHitFlash);
-  }
-
-  // 2. Soya Qotili (Shadow Ninja — Ko'mir-Qora Shinobi, Binafsha Sharf, Egri Xanjar)
-  drawShadowNinja(ctx, fighter, isHitFlash) {
-    const pal = fighter.heroConfig.palette;
-    const { state } = fighter;
-
-    // Orqa oyoq va shinobi bog'ichlari
+    // 2. ORQA QO'L (Rear Arm & Weapon Handle)
     ctx.save();
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.armorDark;
+    ctx.fillStyle = baseColor;
     ctx.beginPath();
-    ctx.roundRect(2, -26, 12, 26, 3);
-    ctx.fill();
-    // Oyoq kiyimi (Tabi)
-    ctx.fillStyle = '#0a0a0c';
-    ctx.fillRect(2, -8, 16, 8);
-    ctx.restore();
-
-    // Tana (Shinobi Shozoku & Crossed Straps)
-    ctx.save();
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.armorMid;
-    ctx.beginPath();
-    ctx.moveTo(-12, -56);
-    ctx.lineTo(14, -56);
-    ctx.lineTo(10, -24);
-    ctx.lineTo(-10, -24);
+    ctx.moveTo(8, -78);
+    ctx.lineTo(18, -62);
+    ctx.lineTo(14, -46);
+    ctx.lineTo(8, -48);
     ctx.closePath();
     ctx.fill();
+    ctx.restore();
 
-    // Ko'krakdagi xoch shaklidagi charm bog'ichlar
-    if (!isHitFlash) {
-      ctx.strokeStyle = pal.accent;
+    // 3. TANA / QAD-QOMAT (Athletic V-Taper Torso & Abs)
+    ctx.save();
+    ctx.fillStyle = baseColor;
+    ctx.strokeStyle = isGhost ? accentColor : 'rgba(255, 255, 255, 0.18)';
+    ctx.lineWidth = 1.8;
+
+    // Ko'krak qafasi va yelka kengligi (Pectoral V-Taper)
+    ctx.beginPath();
+    ctx.moveTo(-18, -82);
+    ctx.lineTo(18, -82);
+    ctx.lineTo(12, -52);
+    ctx.lineTo(-12, -52);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Qorin va bel (Abdominal & Waist)
+    ctx.fillStyle = armorColor;
+    ctx.beginPath();
+    ctx.moveTo(-12, -52);
+    ctx.lineTo(12, -52);
+    ctx.lineTo(9, -38);
+    ctx.lineTo(-9, -38);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Mushaklar va Zirh plitalari chiziqlari (Anatomical contours)
+    if (!isHitFlash && !isGhost) {
+      ctx.strokeStyle = accentColor;
       ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(-10, -52);
-      ctx.lineTo(8, -26);
-      ctx.moveTo(10, -52);
-      ctx.lineTo(-8, -26);
-      ctx.stroke();
-    }
-    ctx.restore();
-
-    // Oldingi oyoq
-    ctx.save();
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.armorDark;
-    ctx.beginPath();
-    ctx.roundRect(-14, -28, 12, 28, 3);
-    ctx.fill();
-    // Binafsha tizma bog'ich
-    ctx.fillStyle = pal.accent;
-    ctx.fillRect(-15, -16, 14, 4);
-    // Tabi
-    ctx.fillStyle = '#0a0a0c';
-    ctx.fillRect(-14, -8, 18, 8);
-    ctx.restore();
-
-    // Bosh (Ninja Cowl & Face Mask with Blowing Headband)
-    ctx.save();
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.armorDark;
-    ctx.beginPath();
-    ctx.arc(2, -68, 12, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Yuz niqobi
-    ctx.fillStyle = '#090a0f';
-    ctx.fillRect(-4, -68, 16, 12);
-
-    // Ko'z kesmasi va binafsha nur
-    if (!isHitFlash) {
-      ctx.fillStyle = pal.eyeGlow;
-      ctx.shadowColor = pal.eyeGlow;
-      ctx.shadowBlur = 10;
-      ctx.beginPath();
-      ctx.ellipse(6, -69, 4, 2, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Boshbog'ning orqada hilpirab turgan tasmasi
-      ctx.strokeStyle = pal.accent;
-      ctx.lineWidth = 3;
+      // Ko'krakdagi elementar chiziq
       ctx.beginPath();
       ctx.moveTo(-8, -70);
-      const wave = Math.sin(this.animTime * 10) * 6;
-      ctx.quadraticCurveTo(-18, -72 + wave, -30, -68 + wave * 1.5);
+      ctx.lineTo(0, -64);
+      ctx.lineTo(8, -70);
       ctx.stroke();
     }
+
+    // Jangovar Belbog' (Obi Sash & Buckle)
+    ctx.fillStyle = accentColor;
+    ctx.fillRect(-12, -40, 24, 5);
+    // Belbog'dan osilib turgan lentalar
+    ctx.fillRect(-2, -35, 4, 16);
+    ctx.fillRect(4, -35, 4, 12);
     ctx.restore();
 
-    // Qurol: Egri Soya Xanjari (Curved Shadow Dagger)
-    this.drawNinjaDagger(ctx, fighter, isHitFlash);
-  }
-
-  // 3. Muz Sehrgari (Frost Mage — Tun-Ko'k Mantiya, Qirovli Zirh, Kristall Muz Tayog'i)
-  drawFrostMage(ctx, fighter, isHitFlash) {
-    const pal = fighter.heroConfig.palette;
-
-    // Uzun Qirovli Mantiya (Robe Body)
+    // 4. OLDINGI OYOQ (Athletic Front Leg in Martial Arts Stance)
     ctx.save();
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.armorDark;
-    ctx.strokeStyle = isHitFlash ? '#fff' : pal.accent;
-    ctx.lineWidth = 1.5;
+    ctx.fillStyle = armorColor;
+    ctx.strokeStyle = isGhost ? accentColor : 'rgba(255, 255, 255, 0.18)';
+    ctx.lineWidth = 1.8;
+
+    // Oldingi son (Muscular Thigh)
     ctx.beginPath();
-    ctx.moveTo(-14, -58);
-    ctx.lineTo(14, -58);
-    ctx.lineTo(20, 0);
-    ctx.lineTo(-18, 0);
+    ctx.moveTo(-8, -46);
+    ctx.lineTo(-2, -22);
+    ctx.lineTo(-14, -20);
+    ctx.lineTo(-16, -44);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
-    // Mantiyaning oldingi ochiq qismi va kumush qirov zanjiri
-    ctx.fillStyle = pal.armorMid;
+    // Tizza qalqoni (Knee Guard)
+    ctx.fillStyle = accentColor;
+    ctx.fillRect(-12, -24, 10, 5);
+
+    // Oldingi boldir va Tabi botinkasi (Kyahan Shin Wraps & Foot)
+    ctx.fillStyle = baseColor;
     ctx.beginPath();
-    ctx.moveTo(-4, -56);
-    ctx.lineTo(4, -56);
-    ctx.lineTo(8, 0);
-    ctx.lineTo(-6, 0);
+    ctx.moveTo(-6, -20);
+    ctx.lineTo(-12, 0);
+    ctx.lineTo(6, 0);
+    ctx.lineTo(0, -12);
     ctx.closePath();
     ctx.fill();
+    ctx.stroke();
     ctx.restore();
 
-    // Sehrgar Kapshoni (Mysterious Hood casting Face Shadow)
+    // 5. BOSH VA BO'YIN (Chiseled Chin, Cowl/Helmet & Glowing Slit)
     ctx.save();
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.armorMid;
+    // Bo'yin (Neck)
+    ctx.fillStyle = baseColor;
+    ctx.fillRect(-4, -88, 8, 8);
+
+    // Bosh (Stylized Ninja Cowl / Kabuto Helmet)
+    ctx.fillStyle = armorColor;
+    ctx.strokeStyle = isGhost ? accentColor : 'rgba(255, 255, 255, 0.2)';
+    ctx.lineWidth = 1.8;
+
     ctx.beginPath();
-    ctx.moveTo(-12, -58);
-    ctx.lineTo(2, -78);
-    ctx.lineTo(16, -58);
+    ctx.moveTo(-10, -100);
+    ctx.lineTo(8, -102);
+    ctx.lineTo(14, -94);
+    ctx.lineTo(8, -84);
+    ctx.lineTo(-6, -84);
+    ctx.lineTo(-12, -92);
     ctx.closePath();
     ctx.fill();
+    ctx.stroke();
 
-    // Qorong'u yuz va moviy sehrli ko'zlar
-    ctx.fillStyle = '#060a14';
-    ctx.beginPath();
-    ctx.arc(3, -66, 9, 0, Math.PI * 2);
-    ctx.fill();
-
-    if (!isHitFlash) {
-      ctx.fillStyle = pal.eyeGlow;
-      ctx.shadowColor = pal.glow;
+    // Ninja Yuz Niqobi va Ko'z Tirqishi (Glowing Slit Eye)
+    if (!isHitFlash && !isGhost) {
+      ctx.fillStyle = accentColor;
+      ctx.shadowColor = accentColor;
       ctx.shadowBlur = 14;
       ctx.beginPath();
-      ctx.arc(6, -67, 3, 0, Math.PI * 2);
+      ctx.moveTo(3, -93);
+      ctx.lineTo(11, -94);
+      ctx.lineTo(9, -91);
+      ctx.lineTo(3, -91);
+      ctx.closePath();
       ctx.fill();
+      ctx.shadowBlur = 0;
     }
     ctx.restore();
 
-    // Qurol: Kristall Muz Tayog'i (Crystal Ice Staff)
-    this.drawMageStaff(ctx, fighter, isHitFlash);
+    // 6. OLDINGI QO'L VA QUROL (Front Arm, Vambrace & Weapon Hand)
+    ctx.save();
+    ctx.fillStyle = armorColor;
+    ctx.strokeStyle = isGhost ? accentColor : 'rgba(255, 255, 255, 0.2)';
+    ctx.lineWidth = 1.8;
+
+    // Yelka (Deltoid) va Tirsak
+    ctx.beginPath();
+    ctx.roundRect(-20, -82, 14, 16, 4);
+    ctx.fill();
+    ctx.stroke();
+
+    // Bilak (Forearm & Vambrace)
+    let armAngle = isBlocking ? -1.1 : isHeavy ? 0.9 : isAttacking ? -0.5 : 0.2;
+    ctx.translate(-12, -70);
+    ctx.rotate(armAngle);
+
+    ctx.fillStyle = baseColor;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, 10, 24, 3);
+    ctx.fill();
+    ctx.stroke();
+
+    // Qurolni chizish (Handheld Ninja/Knight Weapons)
+    if (!isGhost) {
+      this.drawHandheldWeapon(ctx, heroId, isHitFlash, accentColor);
+    }
+    ctx.restore();
   }
 
-  // Plash / Sharf Verlet fizikasi
-  drawHandcraftedCape(ctx, fighter, isHitFlash) {
+  // Qurollar: Ninja Xanjari / Qilichi, Ritsar Katana / Qilichi, Sehrgar Asosi
+  drawHandheldWeapon(ctx, heroId, isHitFlash, accentColor) {
+    ctx.save();
+    ctx.translate(5, 22);
+
+    if (heroId === 'shadow_ninja') {
+      // Egri Ninja Qilichi (Ninjato / Katana)
+      ctx.fillStyle = isHitFlash ? '#fff' : '#c4b5fd';
+      ctx.shadowColor = accentColor;
+      ctx.shadowBlur = 16;
+
+      ctx.beginPath();
+      ctx.moveTo(-2, 0);
+      ctx.quadraticCurveTo(28, -20, 68, -12);
+      ctx.quadraticCurveTo(34, -4, 0, 4);
+      ctx.closePath();
+      ctx.fill();
+
+      // Dasta va Tsuba gardasi
+      ctx.fillStyle = '#1e1b4b';
+      ctx.fillRect(-12, -2, 12, 6);
+      ctx.fillStyle = accentColor;
+      ctx.fillRect(-2, -6, 4, 14);
+    } else if (heroId === 'blaze_knight') {
+      // Og'ir Olovli Nodachi / Katta Qilich
+      ctx.fillStyle = isHitFlash ? '#fff' : '#fed7aa';
+      ctx.shadowColor = accentColor;
+      ctx.shadowBlur = 18;
+
+      ctx.fillRect(0, -7, 72, 14);
+      // Uchi
+      ctx.beginPath();
+      ctx.moveTo(72, -7);
+      ctx.lineTo(88, 0);
+      ctx.lineTo(72, 7);
+      ctx.closePath();
+      ctx.fill();
+
+      // Magma o'yig'i
+      ctx.strokeStyle = '#ea580c';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(4, -4, 64, 8);
+
+      // Gardasi
+      ctx.fillStyle = '#292524';
+      ctx.fillRect(-4, -16, 8, 32);
+      // Dasta
+      ctx.fillStyle = '#44403c';
+      ctx.fillRect(-18, -4, 14, 8);
+    } else {
+      // Kristall Muz Naginata Tayog'i
+      ctx.strokeStyle = isHitFlash ? '#fff' : '#94a3b8';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(-18, 30);
+      ctx.lineTo(24, -48);
+      ctx.stroke();
+
+      // Kristall uch
+      ctx.fillStyle = accentColor;
+      ctx.shadowColor = accentColor;
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      ctx.moveTo(24, -48);
+      ctx.lineTo(34, -62);
+      ctx.lineTo(24, -76);
+      ctx.lineTo(14, -62);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // Shadow Fight uslubidagi lentalar va sharf (Verlet Cloth Ribbons)
+  drawShadowCloth(ctx, fighter, isHitFlash) {
     const { heroConfig } = fighter;
     ctx.save();
     ctx.strokeStyle = isHitFlash ? '#ffffff' : heroConfig.palette.cloth;
-    ctx.lineWidth = heroConfig.id === 'shadow_ninja' ? 9 : 16;
+    ctx.lineWidth = heroConfig.id === 'shadow_ninja' ? 10 : 18;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.beginPath();
-    ctx.moveTo(0, -42);
+    ctx.moveTo(0, -60);
     for (let i = 1; i < fighter.capePoints.length; i++) {
       const pt = fighter.capePoints[i];
       const lx = (pt.x - fighter.x) * fighter.facing;
@@ -405,136 +403,33 @@ export class FighterRenderer {
     ctx.restore();
   }
 
-  // Qilichlar va Qurollar
-  drawKnightSword(ctx, fighter, isHitFlash) {
-    const pal = fighter.heroConfig.palette;
-    const { state } = fighter;
-
-    ctx.save();
-    ctx.translate(14, -34);
-
-    if (state === 'attack_light') ctx.rotate(-0.5);
-    else if (state === 'attack_heavy') ctx.rotate(0.8);
-    else if (state === 'block') ctx.rotate(-1.2);
-
-    // Tig' (Blade)
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.weaponMetal;
-    ctx.fillRect(0, -7, 52, 14);
-
-    // Qilich uchi (Point)
-    ctx.beginPath();
-    ctx.moveTo(52, -7);
-    ctx.lineTo(66, 0);
-    ctx.lineTo(52, 7);
-    ctx.closePath();
-    ctx.fill();
-
-    // Olovli yoriq nuri
-    ctx.strokeStyle = pal.weaponAura;
-    ctx.lineWidth = 3;
-    ctx.shadowColor = pal.weaponAura;
-    ctx.shadowBlur = 14;
-    ctx.strokeRect(2, -5, 48, 10);
-
-    // Qilich gardasi (Crossguard)
-    ctx.fillStyle = '#262428';
-    ctx.fillRect(-4, -14, 8, 28);
-
-    // Qilich dastasi (Grip)
-    ctx.fillStyle = '#4b5563';
-    ctx.fillRect(-16, -4, 12, 8);
-    ctx.restore();
-  }
-
-  drawNinjaDagger(ctx, fighter, isHitFlash) {
-    const pal = fighter.heroConfig.palette;
-    const { state } = fighter;
-
-    ctx.save();
-    ctx.translate(12, -30);
-    if (state === 'attack_light') ctx.rotate(-0.4);
-    else if (state === 'attack_heavy') ctx.rotate(0.5);
-
-    // Egri tig'
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.weaponMetal;
-    ctx.shadowColor = pal.weaponAura;
-    ctx.shadowBlur = 12;
-    ctx.beginPath();
-    ctx.moveTo(0, -3);
-    ctx.quadraticCurveTo(24, -12, 38, -2);
-    ctx.quadraticCurveTo(20, 6, 0, 4);
-    ctx.closePath();
-    ctx.fill();
-
-    // Dasta
-    ctx.fillStyle = '#111827';
-    ctx.fillRect(-10, -3, 10, 6);
-    ctx.restore();
-  }
-
-  drawMageStaff(ctx, fighter, isHitFlash) {
-    const pal = fighter.heroConfig.palette;
-    ctx.save();
-    ctx.translate(10, -28);
-
-    // Tayoq dastasi
-    ctx.strokeStyle = isHitFlash ? '#fff' : '#475569';
-    ctx.lineWidth = 4.5;
-    ctx.beginPath();
-    ctx.moveTo(-6, 28);
-    ctx.lineTo(18, -32);
-    ctx.stroke();
-
-    // Kristall uchi (Glowing Floating Ice Crystal)
-    const floatP = Math.sin(this.animTime * 6) * 3;
-    ctx.fillStyle = isHitFlash ? '#fff' : pal.accent;
-    ctx.shadowColor = pal.glow;
-    ctx.shadowBlur = 20;
-
-    ctx.beginPath();
-    ctx.moveTo(20, -36 + floatP);
-    ctx.lineTo(26, -44 + floatP);
-    ctx.lineTo(20, -52 + floatP);
-    ctx.lineTo(14, -44 + floatP);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-  }
-
-  // Hujum Yoyi Smearlari (Attack Slash Arcs — Qilichning Havodagi Yarim Oy Izlari)
+  // Dynamic Curved Attack Slash Arcs (Qilichning yarim oy shaklidagi havodagi nuri)
   drawAttackSmear(ctx, fighter) {
-    const { state, stateTimer, heroConfig } = fighter;
+    const { state, heroConfig } = fighter;
     if (!['attack_light', 'attack_heavy', 'skill'].includes(state)) return;
 
     ctx.save();
-    ctx.translate(16, -34);
+    ctx.translate(20, -42);
 
     const isHeavy = state === 'attack_heavy';
     const isSkill = state === 'skill';
-    const radius = isSkill ? 75 : isHeavy ? 65 : 50;
+    const radius = isSkill ? 95 : isHeavy ? 80 : 60;
 
-    // Yarim oy shaklidagi dinamik smear
-    const grad = ctx.createRadialGradient(0, 0, radius * 0.4, 0, 0, radius);
+    const grad = ctx.createRadialGradient(0, 0, radius * 0.45, 0, 0, radius);
     grad.addColorStop(0, 'rgba(255, 255, 255, 0)');
-    grad.addColorStop(0.7, heroConfig.palette.glow);
-    grad.addColorStop(1, 'rgba(255, 255, 255, 0.85)');
+    grad.addColorStop(0.65, heroConfig.palette.glow);
+    grad.addColorStop(1, '#ffffff');
 
     ctx.fillStyle = grad;
     ctx.shadowColor = heroConfig.palette.glow;
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur = 24;
 
     ctx.beginPath();
-    ctx.arc(0, 0, radius, -Math.PI * 0.4, Math.PI * 0.4, false);
-    ctx.arc(0, 0, radius * 0.7, Math.PI * 0.4, -Math.PI * 0.4, true);
+    ctx.arc(0, 0, radius, -Math.PI * 0.45, Math.PI * 0.45, false);
+    ctx.arc(0, 0, radius * 0.68, Math.PI * 0.45, -Math.PI * 0.45, true);
     ctx.closePath();
     ctx.fill();
 
     ctx.restore();
-  }
-
-  drawFullSilhouette(ctx, heroId) {
-    ctx.beginPath();
-    ctx.ellipse(0, -42, 28, 50, 0, 0, Math.PI * 2);
-    ctx.fill();
   }
 }

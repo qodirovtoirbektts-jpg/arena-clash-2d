@@ -121,9 +121,10 @@ function onRoundWon(winner, loser) {
   audioEngine.playKo();
   loop.setTimeScale(0.2, 0.9);
 
-  hud.showBanner(`${winner.name} G'ALABA QOZONDI!`, 2.2, 'hazard');
-  hud.setCommsMessage(`K.O. QAYD ETILDI // G'OLIB: ${winner.name}`);
-  hud.addToast(`K.O. FINISHER // ${winner.name} G'ALABA QOZONDI!`, 'crimson');
+  const victoryText = winner.id === 'p1' ? "SIZ G'ALABA QOZONDINGIZ!" : `${winner.name} G'ALABA QOZONDI!`;
+  hud.showBanner(victoryText, 2.2, 'hazard');
+  hud.setCommsMessage(`K.O. QAYD ETILDI // ${victoryText}`);
+  hud.addToast(`K.O. FINISHER // ${victoryText}`, 'crimson');
 }
 
 // Fixed Update sikli (60Hz)
